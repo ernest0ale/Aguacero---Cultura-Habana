@@ -20,7 +20,7 @@
             border-radius: 24px;
             padding: 2.5rem;
             width: 100%;
-            max-width: 450px;
+            max-width: 500px;
             box-shadow: 0 10px 40px var(--shadow-border);
         }
         .auth-card h1 {
@@ -51,6 +51,25 @@
             color: var(--color-text-primary);
             font-size: 1rem;
         }
+        .password-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        .password-wrapper input {
+            width: 100%;
+            padding: 0.8rem;
+            padding-right: 3rem;
+        }
+        .toggle-password {
+            position: absolute;
+            right: 12px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            color: var(--color-text-secondary);
+            background: none;
+            border: none;
+        }
         .phone-container {
             display: flex;
             align-items: center;
@@ -62,8 +81,6 @@
             background: var(--color-bg);
             border: 1px solid var(--color-border);
             border-radius: 12px;
-            color: var(--color-text-primary);
-            font-weight: 500;
             text-align: center;
         }
         .phone-number {
@@ -72,12 +89,6 @@
             border: 1px solid var(--color-border);
             border-radius: 12px;
             background: var(--color-bg);
-            color: var(--color-text-primary);
-            font-size: 1rem;
-        }
-        .phone-number:focus {
-            outline: none;
-            border-color: rgb(2, 90, 138);
         }
         .btn-register {
             width: 100%;
@@ -114,74 +125,223 @@
             margin-bottom: 1rem;
             text-align: center;
         }
-        .success-message {
-            background: rgba(40, 167, 69, 0.1);
-            color: #28a745;
-            padding: 0.8rem;
-            border-radius: 8px;
-            margin-bottom: 1rem;
+        
+        /* Estilos para preferencias */
+        .preferences-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+        .pref-card {
+            background: var(--color-bg);
+            border: 2px solid var(--color-border);
+            border-radius: 16px;
+            padding: 1rem;
             text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .pref-card:hover {
+            transform: translateY(-3px);
+        }
+        .pref-card.selected {
+            background: rgb(2, 90, 138);
+            border-color: rgb(2, 90, 138);
+            color: white;
+        }
+        .pref-card .pref-emoji {
+            font-size: 2rem;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+        .pref-card .pref-name {
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        .select-all-btn {
+            display: inline-block;
+            padding: 0.4rem 1rem;
+            background: var(--color-border);
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            margin-bottom: 1rem;
         }
     </style>
 </head>
 <body>
     <div class="auth-container">
-        <div class="auth-card">
+        <div class="auth-card" id="registro-card">
             <h1>🎭 Cultura Habana</h1>
             <p class="subtitle">Crea tu cuenta y disfruta de más funciones</p>
             
             <div id="message"></div>
             
-            <form id="register-form">
-                <div class="form-group">
-                    <label>Nombre completo *</label>
-                    <input type="text" id="nombre" required autocomplete="name">
-                </div>
-                <div class="form-group">
-                    <label>Correo electrónico *</label>
-                    <input type="email" id="email" required autocomplete="email">
-                </div>
-                <div class="form-group">
-                    <label>Teléfono</label>
-                    <div class="phone-container">
-                        <span class="phone-prefix">+53</span>
-                        <input type="tel" id="telefono" class="phone-number" placeholder="5XXXXXXXX" maxlength="8" pattern="[0-9]{8}" title="8 dígitos del número de teléfono">
+            <!-- Paso 1: Registro -->
+            <div id="step-registro">
+                <form id="register-form">
+                    <div class="form-group">
+                        <label>Nombre completo *</label>
+                        <input type="text" id="nombre" required autocomplete="name">
                     </div>
-                    <small style="color: var(--color-text-secondary); font-size: 0.7rem;">8 dígitos (ejemplo: 51234567)</small>
+                    <div class="form-group">
+                        <label>Correo electrónico *</label>
+                        <input type="email" id="email" required autocomplete="email">
+                    </div>
+                    <div class="form-group">
+                        <label>Teléfono</label>
+                        <div class="phone-container">
+                            <span class="phone-prefix">+53</span>
+                            <input type="tel" id="telefono" class="phone-number" placeholder="5XXXXXXXX" maxlength="8">
+                        </div>
+                        <small style="color: var(--color-text-secondary);">8 dígitos (ejemplo: 51234567)</small>
+                    </div>
+                    <div class="form-group">
+                        <label>Tipo de cuenta *</label>
+                        <select id="rol">
+                            <option value="usuario">Usuario (asistir a eventos)</option>
+                            <option value="organizador">Organizador (promocionar eventos)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Contraseña *</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="password" required autocomplete="new-password" minlength="4">
+                            <button type="button" class="toggle-password" onclick="togglePassword('password')">👁️</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Confirmar contraseña *</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="confirm_password" required autocomplete="new-password">
+                            <button type="button" class="toggle-password" onclick="togglePassword('confirm_password')">👁️</button>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-register">Registrarme</button>
+                </form>
+                
+                <div class="login-link">
+                    ¿Ya tienes cuenta? <a href="login.html">Inicia sesión</a>
                 </div>
-                <div class="form-group">
-                    <label>Tipo de cuenta *</label>
-                    <select id="rol">
-                        <option value="usuario">Usuario (asistir a eventos)</option>
-                        <option value="organizador">Organizador (promocionar eventos)</option>
-                    </select>
+                <div class="login-link">
+                    <a href="inicio.html">← Continuar sin registrar</a>
                 </div>
-                <div class="form-group">
-                    <label>Contraseña *</label>
-                    <input type="password" id="password" required autocomplete="new-password" minlength="4">
-                </div>
-                <div class="form-group">
-                    <label>Confirmar contraseña *</label>
-                    <input type="password" id="confirm_password" required autocomplete="new-password">
-                </div>
-                <button type="submit" class="btn-register">Registrarme</button>
-            </form>
-            
-            <div class="login-link">
-                ¿Ya tienes cuenta? <a href="login.html">Inicia sesión</a>
             </div>
-            <div class="login-link">
-                <a href="inicio.html">← Continuar sin registrar</a>
+            
+            <!-- Paso 2: Preferencias -->
+            <div id="step-preferencias" style="display: none;">
+                <h2 style="text-align: center; margin-bottom: 0.5rem;">🎨 Elige tus preferencias</h2>
+                <p style="text-align: center; color: var(--color-text-secondary); margin-bottom: 1rem;">Selecciona las categorías que más te interesan</p>
+                
+                <div style="text-align: center;">
+                    <span class="select-all-btn" id="selectAllBtn">✅ Seleccionar todas</span>
+                </div>
+                
+                <div id="preferences-grid" class="preferences-grid"></div>
+                
+                <button id="savePreferencesBtn" class="btn-register">Iniciar</button>
             </div>
         </div>
     </div>
 
     <script src="data.js"></script>
     <script>
-        // Verificar si ya hay sesión activa
-        if (getUsuarioActual()) {
-            window.location.href = 'inicio.html';
+        // ==================== TEMA OSCURO PERSISTENTE ====================
+        let isDarkMode = localStorage.getItem('darkMode') === 'true';
+        
+        function applyTheme() {
+            if (isDarkMode) {
+                document.body.classList.add('dark-mode');
+            } else {
+                document.body.classList.remove('dark-mode');
+            }
         }
+        
+        applyTheme();
+        
+        // ==================== VARIABLES ====================
+        let temporalUserData = null;
+        
+        const categoriasConEmojis = [
+            { nombre: "Conciertos", emoji: "🎵" },
+            { nombre: "Teatro", emoji: "🎭" },
+            { nombre: "Cine", emoji: "🎬" },
+            { nombre: "Exposiciones", emoji: "🖼️" },
+            { nombre: "Danza", emoji: "💃" },
+            { nombre: "Libros", emoji: "📚" },
+            { nombre: "Festival", emoji: "🎉" },
+            { nombre: "Infantiles", emoji: "🧸" },
+            { nombre: "Deportes", emoji: "⚽" },
+            { nombre: "Talleres", emoji: "🔧" },
+            { nombre: "Museos", emoji: "🏛️" },
+            { nombre: "Ferias", emoji: "🛍️" },
+            { nombre: "Farándula", emoji: "✨" }
+        ];
+        
+        function togglePassword(fieldId) {
+            const field = document.getElementById(fieldId);
+            field.type = field.type === 'password' ? 'text' : 'password';
+        }
+        
+        function mostrarMensaje(mensaje, tipo) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.className = tipo === 'error' ? 'error-message' : 'success-message';
+            messageDiv.textContent = mensaje;
+            messageDiv.style.display = 'block';
+            setTimeout(() => { messageDiv.style.display = 'none'; }, 3000);
+        }
+        
+        function renderizarPreferencias() {
+            const container = document.getElementById('preferences-grid');
+            container.innerHTML = categoriasConEmojis.map(cat => `
+                <div class="pref-card" data-categoria="${cat.nombre}">
+                    <span class="pref-emoji">${cat.emoji}</span>
+                    <span class="pref-name">${cat.nombre}</span>
+                </div>
+            `).join('');
+            
+            document.querySelectorAll('.pref-card').forEach(card => {
+                card.classList.add('selected');
+                card.addEventListener('click', () => {
+                    card.classList.toggle('selected');
+                });
+            });
+        }
+        
+        function getSelectedPreferences() {
+            const selected = [];
+            document.querySelectorAll('.pref-card.selected').forEach(card => {
+                selected.push(card.getAttribute('data-categoria'));
+            });
+            return selected;
+        }
+        
+        document.getElementById('selectAllBtn')?.addEventListener('click', () => {
+            const cards = document.querySelectorAll('.pref-card');
+            const allSelected = Array.from(cards).every(card => card.classList.contains('selected'));
+            cards.forEach(card => {
+                if (allSelected) {
+                    card.classList.remove('selected');
+                } else {
+                    card.classList.add('selected');
+                }
+            });
+        });
+        
+        document.getElementById('savePreferencesBtn')?.addEventListener('click', () => {
+            const preferencias = getSelectedPreferences();
+            if (temporalUserData) {
+                temporalUserData.preferencias = preferencias;
+                const resultado = registrarUsuario(temporalUserData);
+                if (resultado.exito) {
+                    iniciarSesion(temporalUserData.email, temporalUserData.password);
+                    window.location.href = 'inicio.html';
+                } else {
+                    mostrarMensaje(resultado.mensaje, 'error');
+                }
+            }
+        });
         
         document.getElementById('register-form').addEventListener('submit', (e) => {
             e.preventDefault();
@@ -209,7 +369,7 @@
                 telefonoCompleto = '+53 ' + telefonoNum;
             }
             
-            const usuario = {
+            temporalUserData = {
                 nombre: document.getElementById('nombre').value.trim(),
                 email: document.getElementById('email').value.trim(),
                 telefono: telefonoCompleto,
@@ -217,34 +377,16 @@
                 password: password
             };
             
-            const resultado = registrarUsuario(usuario);
-            
-            if (resultado.exito) {
-                // Iniciar sesión automáticamente después del registro
-                iniciarSesion(usuario.email, usuario.password);
-                mostrarMensaje('¡Registro exitoso! Redirigiendo al inicio...', 'success');
-                setTimeout(() => {
-                    window.location.href = 'inicio.html';
-                }, 1500);
-            } else {
-                mostrarMensaje(resultado.mensaje, 'error');
-            }
+            document.getElementById('step-registro').style.display = 'none';
+            document.getElementById('step-preferencias').style.display = 'block';
+            renderizarPreferencias();
         });
         
-        function mostrarMensaje(mensaje, tipo) {
-            const messageDiv = document.getElementById('message');
-            messageDiv.className = tipo === 'error' ? 'error-message' : 'success-message';
-            messageDiv.textContent = mensaje;
-            messageDiv.style.display = 'block';
-            setTimeout(() => {
-                messageDiv.style.display = 'none';
-            }, 3000);
-        }
-        
-        // Validar solo números en el campo de teléfono
         document.getElementById('telefono').addEventListener('input', function(e) {
             this.value = this.value.replace(/[^0-9]/g, '').slice(0, 8);
         });
+        
+        window.togglePassword = togglePassword;
     </script>
 </body>
 </html>

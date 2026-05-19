@@ -1,6 +1,467 @@
-﻿// ==================== VARIABLES GLOBALES ====================
+﻿﻿// ==================== VARIABLES GLOBALES ====================
 let isDarkMode = localStorage.getItem('darkMode') === 'true';
-let isMenuMinimized = localStorage.getItem('menuMinimized') === 'true';
+
+// ==================== DETECTAR MÓVIL ====================
+function isMobile() {
+    return window.innerWidth <= 700;
+}
+
+// ==================== FUNCIONES COMPLEMENTARIAS ====================
+function formatFechaShort(fechaStr) {
+    const fecha = new Date(fechaStr);
+    return fecha.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+}
+
+function formatFechaDDMMYYYY(fechaStr) {
+    const fecha = new Date(fechaStr);
+    const dia = fecha.getDate().toString().padStart(2, '0');
+    const mes = (fecha.getMonth() + 1).toString().padStart(2, '0');
+    const anio = fecha.getFullYear();
+    return `${dia}/${mes}/${anio}`;
+}
+
+function getIconoCategoria(categoria) {
+    const iconos = {
+        'Conciertos': '🎵', 'Teatro': '🎭', 'Cine': '🎬', 'Exposiciones': '🖼️',
+        'Danza': '💃', 'Libros': '📚', 'Festival': '🎉', 'Infantiles': '🧸',
+        'Deportes': '⚽', 'Talleres': '🔧', 'Museos': '🏛️', 'Ferias': '🛍️', 'Farándula': '✨'
+    };
+    return iconos[categoria] || '📌';
+}
+
+// ==================== FUNCIÓN PARA OBTENER PREFERENCIAS DEL USUARIO ====================
+function getPreferenciasUsuario() {
+    const usuario = getUsuarioActual();
+    return usuario?.preferencias || [];
+}
+
+// ==================== MENÚ LATERAL UNIFICADO ====================
+function initSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const menuToggleBtn = document.getElementById('menuToggleBtn');
+    const categoriasMenuItem = document.querySelector('.menu-item-dropdown');
+    const categoriasBtn = categoriasMenuItem ? categoriasMenuItem.querySelector('.menu-link') : null;
+    const submenuCategorias = categoriasMenuItem ? categoriasMenuItem.querySelector('.sub-menu') : null;
+    
+    if (!sidebar) return;
+    
+    let activeTooltip = null;
+    let tooltipTimeout = null;
+    
+    const currentPage = window.location.pathname.split('/').pop() || 'inicio.html';
+    
+    // Variable para mantener el estado de categorías (abierto/cerrado)
+    let isCategoriasOpen = false;
+    
+    // ========== FUNCIÓN PARA OBTENER ALTURA REAL DEL SUBMENÚ ==========
+    function getSubmenuRealHeight() {
+        if (!submenuCategorias) return 0;
+        // Guardar estilos originales
+        const originalStyles = {
+            height: submenuCategorias.style.height,
+            padding: submenuCategorias.style.padding,
+            display: submenuCategorias.style.display,
+            visibility: submenuCategorias.style.visibility,
+            position: submenuCategorias.style.position
+        };
+        
+        // Forzar temporalmente para medir
+        submenuCategorias.style.height = 'auto';
+        submenuCategorias.style.padding = '0.2rem 0';
+        submenuCategorias.style.display = 'block';
+        submenuCategorias.style.visibility = 'visible';
+        submenuCategorias.style.position = 'absolute';
+        
+        const realHeight = submenuCategorias.scrollHeight;
+        
+        // Restaurar estilos
+        submenuCategorias.style.height = originalStyles.height;
+        submenuCategorias.style.padding = originalStyles.padding;
+        submenuCategorias.style.display = originalStyles.display;
+        submenuCategorias.style.visibility = originalStyles.visibility;
+        submenuCategorias.style.position = originalStyles.position;
+        
+        return realHeight;
+    }
+    
+    // ========== FUNCIÓN PARA ABRIR SUBMENÚ EN MODO ACORDEÓN (cuando sidebar está expandido) ==========
+    function openAccordionSubmenu() {
+        if (!submenuCategorias) return;
+        // Limpiar cualquier estilo flotante previo
+        submenuCategorias.style.cssText = '';
+        submenuCategorias.classList.remove('floating-submenu');
+        submenuCategorias.style.position = 'relative';
+        
+        const realHeight = getSubmenuRealHeight();
+        submenuCategorias.style.height = `${realHeight + 10}px`;
+        submenuCategorias.style.padding = '0.2rem 0';
+        submenuCategorias.style.overflow = 'hidden';
+        
+        if (categoriasMenuItem) {
+            categoriasMenuItem.classList.add('sub-menu-toggle');
+        }
+        isCategoriasOpen = true;
+    }
+    
+    // ========== FUNCIÓN PARA CERRAR SUBMENÚ EN MODO ACORDEÓN ==========
+    function closeAccordionSubmenu() {
+        if (!submenuCategorias) return;
+        submenuCategorias.style.height = '0';
+        submenuCategorias.style.padding = '0';
+        submenuCategorias.style.overflow = 'hidden';
+        if (categoriasMenuItem) {
+            categoriasMenuItem.classList.remove('sub-menu-toggle');
+        }
+        isCategoriasOpen = false;
+    }
+    
+    // ========== FUNCIÓN PARA CERRAR SUBMENÚ FLOTANTE ==========
+    function closeFloatingSubmenu() {
+        if (submenuCategorias) {
+            submenuCategorias.classList.remove('floating-submenu');
+            submenuCategorias.style.cssText = '';
+            submenuCategorias.style.height = '0';
+            submenuCategorias.style.padding = '0';
+            submenuCategorias.style.overflow = 'hidden';
+            if (categoriasMenuItem) {
+                categoriasMenuItem.classList.remove('sub-menu-toggle');
+            }
+        }
+        isCategoriasOpen = false;
+    }
+    
+    // ========== FUNCIÓN PARA ABRIR SUBMENÚ FLOTANTE (USANDO rem COMO EL TEMPLATE) ==========
+    function openFloatingSubmenu() {
+        if (!submenuCategorias) return;
+        
+        if (activeTooltip) {
+            activeTooltip.remove();
+            activeTooltip = null;
+        }
+        if (tooltipTimeout) clearTimeout(tooltipTimeout);
+        
+        // Limpiar estilos previos
+        submenuCategorias.style.cssText = '';
+        submenuCategorias.classList.remove('floating-submenu');
+        
+        // Asegurar que el menu-item sea el contenedor de referencia
+        if (categoriasMenuItem) {
+            categoriasMenuItem.style.position = 'relative';
+        }
+        
+        // Aplicar estilos flotantes - USANDO rem (como el template)
+        submenuCategorias.style.position = 'absolute';
+        submenuCategorias.style.left = '5rem';
+        submenuCategorias.style.top = '7.8rem';
+        submenuCategorias.style.width = '180px';
+        submenuCategorias.style.maxHeight = '300px';
+        submenuCategorias.style.overflowY = 'auto';
+        submenuCategorias.style.padding = '0.5rem 0';
+        submenuCategorias.style.backgroundColor = 'var(--color-surface)';
+        submenuCategorias.style.borderRadius = '0.5rem';
+        submenuCategorias.style.boxShadow = '0 4px 12px var(--shadow-border)';
+        submenuCategorias.style.border = '1px solid var(--color-border)';
+        submenuCategorias.style.zIndex = '10000';
+        submenuCategorias.style.display = 'block';
+        submenuCategorias.style.visibility = 'visible';
+        submenuCategorias.style.opacity = '1';
+        submenuCategorias.style.height = 'auto';
+        
+        submenuCategorias.classList.add('floating-submenu');
+        
+        if (categoriasMenuItem) {
+            categoriasMenuItem.classList.add('sub-menu-toggle');
+        }
+        isCategoriasOpen = true;
+        
+        // Cerrar al hacer clic fuera
+        const closeHandler = (event) => {
+            if (categoriasBtn && !categoriasBtn.contains(event.target) && 
+                submenuCategorias && !submenuCategorias.contains(event.target)) {
+                closeFloatingSubmenu();
+                document.removeEventListener('click', closeHandler);
+                document.removeEventListener('touchstart', closeHandler);
+            }
+        };
+        
+        setTimeout(() => {
+            document.addEventListener('click', closeHandler);
+            document.addEventListener('touchstart', closeHandler);
+        }, 10);
+    }
+    
+    // ========== APLICAR ESTADO INICIAL ==========
+    function applyInitialState() {
+        if (isMobile()) {
+            sidebar.classList.remove('minimize');
+            document.body.classList.remove('sidebar-visible');
+            closeFloatingSubmenu();
+            closeAccordionSubmenu();
+        } else {
+            document.body.classList.remove('sidebar-visible');
+            sidebar.classList.add('minimize');
+            closeFloatingSubmenu();
+            closeAccordionSubmenu();
+            isCategoriasOpen = false;
+            // Resetear posición del menu-item
+            if (categoriasMenuItem) {
+                categoriasMenuItem.style.position = '';
+            }
+        }
+    }
+    
+    applyInitialState();
+    updateActiveMenuItem();
+    
+    // ========== TOGGLE DEL MENÚ ==========
+    if (menuToggleBtn) {
+        menuToggleBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            
+            if (isMobile()) {
+                document.body.classList.toggle('sidebar-visible');
+                closeFloatingSubmenu();
+                closeAccordionSubmenu();
+            } else {
+                if (sidebar.classList.contains('minimize')) {
+                    // Expandir menú
+                    sidebar.classList.remove('minimize');
+                    // Resetear posición del menu-item
+                    if (categoriasMenuItem) {
+                        categoriasMenuItem.style.position = '';
+                    }
+                    if (isCategoriasOpen) {
+                        setTimeout(() => {
+                            openAccordionSubmenu();
+                        }, 50);
+                    }
+                } else {
+                    // Minimizar menú
+                    sidebar.classList.add('minimize');
+                    if (isCategoriasOpen) {
+                        setTimeout(() => {
+                            openFloatingSubmenu();
+                        }, 50);
+                    } else {
+                        closeFloatingSubmenu();
+                        closeAccordionSubmenu();
+                    }
+                }
+            }
+            
+            if (activeTooltip) {
+                activeTooltip.remove();
+                activeTooltip = null;
+            }
+            if (tooltipTimeout) clearTimeout(tooltipTimeout);
+        });
+    }
+    
+    // ========== COMPORTAMIENTO DE CATEGORÍAS ==========
+    if (categoriasBtn && submenuCategorias && categoriasMenuItem) {
+        
+        categoriasBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            if (isMobile()) {
+                if (!isCategoriasOpen) {
+                    const realHeight = getSubmenuRealHeight();
+                    submenuCategorias.style.height = `${realHeight + 10}px`;
+                    submenuCategorias.style.padding = '0.2rem 0';
+                    categoriasMenuItem.classList.add('sub-menu-toggle');
+                    isCategoriasOpen = true;
+                } else {
+                    submenuCategorias.style.height = '0';
+                    submenuCategorias.style.padding = '0';
+                    categoriasMenuItem.classList.remove('sub-menu-toggle');
+                    isCategoriasOpen = false;
+                }
+                return;
+            }
+            
+            // DESKTOP - MENÚ EXPANDIDO: acordeón normal
+            if (!sidebar.classList.contains('minimize')) {
+                if (!isCategoriasOpen) {
+                    openAccordionSubmenu();
+                } else {
+                    closeAccordionSubmenu();
+                }
+                return;
+            }
+            
+            // DESKTOP - MENÚ CONTRADO: submenú flotante
+            if (sidebar.classList.contains('minimize')) {
+                if (!isCategoriasOpen) {
+                    openFloatingSubmenu();
+                } else {
+                    closeFloatingSubmenu();
+                }
+            }
+        });
+    }
+    
+    // ========== TOOLTIPS PARA MENÚ CONTRADO ==========
+    function showTooltip(element, text) {
+        if (isMobile()) return;
+        if (!sidebar.classList.contains('minimize')) return;
+        
+        if (submenuCategorias && submenuCategorias.classList.contains('floating-submenu')) {
+            return;
+        }
+        
+        if (activeTooltip) {
+            activeTooltip.remove();
+            activeTooltip = null;
+        }
+        if (tooltipTimeout) clearTimeout(tooltipTimeout);
+        
+        const rect = element.getBoundingClientRect();
+        const sidebarRect = sidebar.getBoundingClientRect();
+        
+        const tooltip = document.createElement('div');
+        tooltip.className = 'menu-tooltip';
+        tooltip.textContent = text;
+        tooltip.style.position = 'fixed';
+        tooltip.style.left = `${sidebarRect.right + 12}px`;
+        tooltip.style.top = `${rect.top + (rect.height / 2)}px`;
+        tooltip.style.transform = 'translateY(-50%)';
+        
+        document.body.appendChild(tooltip);
+        activeTooltip = tooltip;
+    }
+    
+    function hideTooltip() {
+        if (activeTooltip) {
+            tooltipTimeout = setTimeout(() => {
+                if (activeTooltip && activeTooltip.parentNode) {
+                    activeTooltip.remove();
+                    activeTooltip = null;
+                }
+                tooltipTimeout = null;
+            }, 150);
+        }
+    }
+    
+    const allMenuItems = document.querySelectorAll('.menu-item');
+    
+    allMenuItems.forEach(item => {
+        const menuLink = item.querySelector('.menu-link');
+        const span = menuLink ? menuLink.querySelector('span') : null;
+        const itemText = span ? span.textContent : '';
+        const isCategoriasItem = item.classList.contains('menu-item-dropdown');
+        
+        item.addEventListener('mouseenter', function() {
+            if (!isMobile() && sidebar.classList.contains('minimize') && itemText) {
+                if (isCategoriasItem && submenuCategorias && submenuCategorias.classList.contains('floating-submenu')) {
+                    return;
+                }
+                showTooltip(this, itemText);
+            }
+        });
+        
+        item.addEventListener('mouseleave', function() {
+            if (!isMobile() && sidebar.classList.contains('minimize')) {
+                hideTooltip();
+            }
+        });
+    });
+    
+    // ========== ENLACES DEL SUBMENÚ ==========
+    const subMenuLinks = document.querySelectorAll('.sub-menu-link');
+    subMenuLinks.forEach(link => {
+        link.removeEventListener('click', handleSubmenuClick);
+        link.addEventListener('click', handleSubmenuClick);
+    });
+    
+    function handleSubmenuClick(e) {
+        e.preventDefault();
+        const categoria = this.getAttribute('data-categoria');
+        if (categoria) {
+            if (activeTooltip) {
+                activeTooltip.remove();
+                activeTooltip = null;
+            }
+            if (tooltipTimeout) clearTimeout(tooltipTimeout);
+            closeFloatingSubmenu();
+            window.location.href = `categoria.html?nombre=${encodeURIComponent(categoria)}`;
+        }
+    }
+    
+    // ========== ENLACES DEL MENÚ PRINCIPAL ==========
+    const mainMenuLinks = document.querySelectorAll('.menu-link:not(#categoriasBtn)');
+    mainMenuLinks.forEach(link => {
+        link.removeEventListener('click', handleMainLinkClick);
+        link.addEventListener('click', handleMainLinkClick);
+    });
+    
+    function handleMainLinkClick(e) {
+        const href = this.getAttribute('href');
+        if (!href || href === '#') return;
+        
+        if (href === currentPage) {
+            e.preventDefault();
+            
+            if (isMobile()) {
+                document.body.classList.remove('sidebar-visible');
+            } else {
+                if (!sidebar.classList.contains('minimize')) {
+                    sidebar.classList.add('minimize');
+                    closeFloatingSubmenu();
+                    closeAccordionSubmenu();
+                }
+            }
+        }
+    }
+    
+    // ========== REDIMENSIONAMIENTO ==========
+    let resizeTimeout;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(() => {
+            if (isMobile()) {
+                document.body.classList.remove('sidebar-visible');
+                sidebar.classList.remove('minimize');
+                closeFloatingSubmenu();
+                closeAccordionSubmenu();
+            } else {
+                sidebar.classList.add('minimize');
+                if (isCategoriasOpen) {
+                    setTimeout(() => {
+                        openFloatingSubmenu();
+                    }, 50);
+                } else {
+                    closeFloatingSubmenu();
+                    closeAccordionSubmenu();
+                }
+            }
+            
+            if (activeTooltip) {
+                activeTooltip.remove();
+                activeTooltip = null;
+            }
+            if (tooltipTimeout) clearTimeout(tooltipTimeout);
+        }, 100);
+    });
+}
+
+// ==================== ACTUALIZAR PÁGINA ACTIVA EN EL MENÚ ====================
+function updateActiveMenuItem() {
+    const currentPath = window.location.pathname.split('/').pop() || 'inicio.html';
+    const menuItems = document.querySelectorAll('.menu-item');
+    
+    menuItems.forEach(item => {
+        const link = item.querySelector('.menu-link');
+        if (link && link.getAttribute('href') && link.getAttribute('href') !== '#') {
+            const href = link.getAttribute('href');
+            if (href === currentPath) {
+                item.classList.add('active');
+            } else {
+                item.classList.remove('active');
+            }
+        }
+    });
+}
 
 // ==================== TEMA OSCURO ====================
 function applyTheme() {
@@ -51,315 +512,7 @@ function applyTheme() {
     }
 }
 
-// ==================== DETECTAR MÓVIL ====================
-function isMobile() {
-    return window.innerWidth <= 700;
-}
-
-// ==================== MENÚ LATERAL ====================
-function initSidebar() {
-    const sidebar = document.getElementById('sidebar');
-    const menuToggleBtn = document.getElementById('menuToggleBtn');
-    const categoriasBtn = document.getElementById('categoriasBtn');
-    const categoriasMenuItem = document.getElementById('categoriasDropdown');
-    const submenuCategorias = document.getElementById('submenuCategorias');
-    
-    if (!sidebar) return;
-    
-    // ========== APLICAR ESTADO INICIAL ==========
-    function applyInitialState() {
-        if (isMobile()) {
-            sidebar.classList.remove('minimize');
-            document.body.classList.remove('sidebar-visible');
-            if (submenuCategorias) {
-                submenuCategorias.classList.remove('floating-submenu', 'submenu-visible');
-                submenuCategorias.style.cssText = '';
-            }
-        } else {
-            document.body.classList.remove('sidebar-visible');
-            if (isMenuMinimized) {
-                sidebar.classList.add('minimize');
-            } else {
-                sidebar.classList.remove('minimize');
-            }
-        }
-    }
-    
-    applyInitialState();
-    
-    // ========== TOGGLE DEL MENÚ ==========
-    if (menuToggleBtn) {
-        menuToggleBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            
-            if (isMobile()) {
-                document.body.classList.toggle('sidebar-visible');
-            } else {
-                isMenuMinimized = !isMenuMinimized;
-                localStorage.setItem('menuMinimized', isMenuMinimized);
-                
-                if (isMenuMinimized) {
-                    sidebar.classList.add('minimize');
-                    if (submenuCategorias) {
-                        submenuCategorias.classList.remove('floating-submenu', 'submenu-visible');
-                        submenuCategorias.style.cssText = '';
-                        if (categoriasMenuItem) {
-                            categoriasMenuItem.classList.remove('sub-menu-toggle');
-                        }
-                    }
-                } else {
-                    sidebar.classList.remove('minimize');
-                    if (submenuCategorias) {
-                        submenuCategorias.classList.remove('floating-submenu', 'submenu-visible');
-                        submenuCategorias.style.cssText = '';
-                        if (categoriasMenuItem) {
-                            categoriasMenuItem.classList.remove('sub-menu-toggle');
-                        }
-                    }
-                }
-            }
-        });
-    }
-    
-    // ========== COMPORTAMIENTO DE CATEGORÍAS ==========
-    if (categoriasBtn && submenuCategorias && categoriasMenuItem) {
-        
-        categoriasBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            
-            // MÓVIL: acordeón normal
-            if (isMobile()) {
-                const isOpen = categoriasMenuItem.classList.contains('sub-menu-toggle');
-                if (!isOpen) {
-                    submenuCategorias.style.height = `${submenuCategorias.scrollHeight + 10}px`;
-                    submenuCategorias.style.padding = '0.2rem 0';
-                    submenuCategorias.style.opacity = '1';
-                    submenuCategorias.style.visibility = 'visible';
-                    submenuCategorias.classList.remove('floating-submenu');
-                    categoriasMenuItem.classList.add('sub-menu-toggle');
-                } else {
-                    submenuCategorias.style.height = '0';
-                    submenuCategorias.style.padding = '0';
-                    submenuCategorias.style.opacity = '0';
-                    submenuCategorias.style.visibility = 'hidden';
-                    categoriasMenuItem.classList.remove('sub-menu-toggle');
-                }
-                return;
-            }
-            
-            // DESKTOP - MENÚ EXPANDIDO: acordeón normal
-            if (!sidebar.classList.contains('minimize')) {
-                const isOpen = categoriasMenuItem.classList.contains('sub-menu-toggle');
-                if (!isOpen) {
-                    submenuCategorias.style.height = `${submenuCategorias.scrollHeight + 10}px`;
-                    submenuCategorias.style.padding = '0.2rem 0';
-                    submenuCategorias.style.opacity = '1';
-                    submenuCategorias.style.visibility = 'visible';
-                    submenuCategorias.classList.remove('floating-submenu');
-                    categoriasMenuItem.classList.add('sub-menu-toggle');
-                } else {
-                    submenuCategorias.style.height = '0';
-                    submenuCategorias.style.padding = '0';
-                    submenuCategorias.style.opacity = '0';
-                    submenuCategorias.style.visibility = 'hidden';
-                    categoriasMenuItem.classList.remove('sub-menu-toggle');
-                }
-                return;
-            }
-            
-            // DESKTOP - MENÚ CONTRÁIDO: submenú flotante
-            if (sidebar.classList.contains('minimize')) {
-                const isOpen = submenuCategorias.classList.contains('submenu-visible');
-                
-                if (isOpen) {
-                    submenuCategorias.classList.remove('floating-submenu', 'submenu-visible');
-                    submenuCategorias.style.cssText = '';
-                    categoriasMenuItem.classList.remove('sub-menu-toggle');
-                    return;
-                }
-                
-                const btnRect = categoriasBtn.getBoundingClientRect();
-                const sidebarRect = sidebar.getBoundingClientRect();
-                
-                submenuCategorias.style.cssText = '';
-                
-                submenuCategorias.style.position = 'fixed';
-                submenuCategorias.style.left = `${sidebarRect.right + 8}px`;
-                submenuCategorias.style.top = `${btnRect.top}px`;
-                submenuCategorias.style.width = '240px';
-                submenuCategorias.style.maxHeight = '400px';
-                submenuCategorias.style.overflowY = 'auto';
-                submenuCategorias.style.padding = '0.5rem 0';
-                submenuCategorias.style.backgroundColor = 'var(--color-surface)';
-                submenuCategorias.style.borderRadius = '0.75rem';
-                submenuCategorias.style.boxShadow = '0 4px 20px rgba(0,0,0,0.2)';
-                submenuCategorias.style.border = '1px solid var(--color-border)';
-                submenuCategorias.style.zIndex = '1000';
-                submenuCategorias.classList.add('floating-submenu', 'submenu-visible');
-                
-                setTimeout(() => {
-                    const submenuRect = submenuCategorias.getBoundingClientRect();
-                    if (submenuRect.bottom > window.innerHeight) {
-                        submenuCategorias.style.top = `${window.innerHeight - submenuRect.height - 10}px`;
-                    }
-                    if (submenuRect.right > window.innerWidth) {
-                        submenuCategorias.style.left = `${sidebarRect.right - submenuRect.width - 8}px`;
-                    }
-                }, 10);
-                
-                categoriasMenuItem.classList.add('sub-menu-toggle');
-                
-                const closeSubmenu = (event) => {
-                    if (!categoriasBtn.contains(event.target) && !submenuCategorias.contains(event.target)) {
-                        submenuCategorias.classList.remove('floating-submenu', 'submenu-visible');
-                        submenuCategorias.style.cssText = '';
-                        categoriasMenuItem.classList.remove('sub-menu-toggle');
-                        document.removeEventListener('click', closeSubmenu);
-                    }
-                };
-                setTimeout(() => {
-                    document.addEventListener('click', closeSubmenu);
-                }, 10);
-            }
-        });
-    }
-    
-    // ========== TOOLTIPS (SOLO DESKTOP Y MENÚ MINIMIZADO) ==========
-    let activeTooltip = null;
-    let tooltipTimeout = null;
-    
-    const allMenuItems = document.querySelectorAll('.menu-item');
-    
-    allMenuItems.forEach(item => {
-        const menuLink = item.querySelector('.menu-link');
-        const span = menuLink ? menuLink.querySelector('span') : null;
-        const itemText = span ? span.textContent : '';
-        
-        item.addEventListener('mouseenter', function(e) {
-            if (!isMobile() && sidebar.classList.contains('minimize') && itemText) {
-                if (tooltipTimeout) clearTimeout(tooltipTimeout);
-                
-                if (activeTooltip && activeTooltip.parentNode) {
-                    activeTooltip.remove();
-                    activeTooltip = null;
-                }
-                
-                const itemRect = this.getBoundingClientRect();
-                const sidebarRect = sidebar.getBoundingClientRect();
-                
-                const tooltip = document.createElement('div');
-                tooltip.className = 'menu-tooltip';
-                tooltip.textContent = itemText;
-                tooltip.style.cssText = `
-                    position: fixed;
-                    left: ${sidebarRect.right + 12}px;
-                    top: ${itemRect.top + (itemRect.height / 2)}px;
-                    transform: translateY(-50%);
-                    padding: 0.5rem 0.8rem;
-                    background-color: var(--color-tooltip-bg);
-                    color: var(--color-tooltip-text);
-                    border-radius: 0.5rem;
-                    font-size: 0.75rem;
-                    font-weight: 500;
-                    white-space: nowrap;
-                    z-index: 1001;
-                    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-                    opacity: 0;
-                    visibility: hidden;
-                    transition: opacity 0.2s ease, visibility 0.2s ease;
-                    pointer-events: none;
-                `;
-                
-                document.body.appendChild(tooltip);
-                activeTooltip = tooltip;
-                
-                setTimeout(() => {
-                    if (activeTooltip === tooltip) {
-                        tooltip.style.opacity = '1';
-                        tooltip.style.visibility = 'visible';
-                    }
-                }, 10);
-            }
-        });
-        
-        item.addEventListener('mouseleave', function() {
-            if (!isMobile() && sidebar.classList.contains('minimize')) {
-                if (activeTooltip) {
-                    activeTooltip.style.opacity = '0';
-                    activeTooltip.style.visibility = 'hidden';
-                    tooltipTimeout = setTimeout(() => {
-                        if (activeTooltip && activeTooltip.parentNode) {
-                            activeTooltip.remove();
-                            activeTooltip = null;
-                        }
-                        tooltipTimeout = null;
-                    }, 200);
-                }
-            }
-        });
-    });
-    
-    // ========== ENLACES DEL SUBMENÚ ==========
-    const subMenuLinks = document.querySelectorAll('.sub-menu-link');
-    subMenuLinks.forEach(link => {
-        link.addEventListener('click', (e) => {
-            e.preventDefault();
-            const categoria = link.getAttribute('data-categoria');
-            if (categoria) {
-                if (activeTooltip && activeTooltip.parentNode) {
-                    activeTooltip.remove();
-                    activeTooltip = null;
-                }
-                window.location.href = `categoria.html?nombre=${encodeURIComponent(categoria)}`;
-            }
-        });
-    });
-    
-    // ========== CERRAR MENÚ EN MÓVIL AL NAVEGAR ==========
-    function handleMobileNavigation() {
-        if (isMobile()) {
-            const allLinks = document.querySelectorAll('.menu-link, .sub-menu-link');
-            allLinks.forEach(link => {
-                link.addEventListener('click', () => {
-                    setTimeout(() => {
-                        document.body.classList.remove('sidebar-visible');
-                    }, 150);
-                });
-            });
-        }
-    }
-    
-    handleMobileNavigation();
-    
-    // ========== MANEJAR REDIMENSIONAMIENTO ==========
-    let resizeTimeout;
-    window.addEventListener('resize', () => {
-        clearTimeout(resizeTimeout);
-        resizeTimeout = setTimeout(() => {
-            if (isMobile()) {
-                if (activeTooltip) {
-                    activeTooltip.remove();
-                    activeTooltip = null;
-                }
-                if (submenuCategorias) {
-                    submenuCategorias.classList.remove('floating-submenu', 'submenu-visible');
-                    submenuCategorias.style.cssText = '';
-                }
-                document.body.classList.remove('sidebar-visible');
-                sidebar.classList.remove('minimize');
-            } else {
-                if (isMenuMinimized) {
-                    sidebar.classList.add('minimize');
-                } else {
-                    sidebar.classList.remove('minimize');
-                }
-            }
-        }, 100);
-    });
-}
-
-// ==================== AVATAR Y SESIÓN ====================
+// ==================== AVATAR CONDICIONAL (ESTILO BOTÓN) ====================
 function initAvatar() {
     const avatarDiv = document.getElementById('avatarUsuario');
     const menuPromocion = document.getElementById('menuPromocion');
@@ -369,14 +522,37 @@ function initAvatar() {
     function updateAvatar() {
         const usuario = getUsuarioActual();
         if (usuario && usuario.nombre) {
-            avatarDiv.textContent = usuario.nombre.charAt(0).toUpperCase();
+            // Usuario logueado - mostrar inicial
+            avatarDiv.innerHTML = usuario.nombre.charAt(0).toUpperCase();
             avatarDiv.style.backgroundColor = usuario.avatarColor || '#2ecc71';
+            avatarDiv.style.color = 'white';
+            avatarDiv.style.border = 'none';
+            avatarDiv.style.fontSize = '1rem';
+            avatarDiv.style.fontWeight = '600';
+            avatarDiv.style.width = '36px';
+            avatarDiv.style.height = '36px';
+            avatarDiv.style.borderRadius = '50%';
+            avatarDiv.style.display = 'flex';
+            avatarDiv.style.alignItems = 'center';
+            avatarDiv.style.justifyContent = 'center';
+            avatarDiv.title = usuario.nombre;
             if (menuPromocion) {
                 menuPromocion.style.display = usuario.rol === 'organizador' ? 'block' : 'none';
             }
         } else {
-            avatarDiv.textContent = '?';
-            avatarDiv.style.backgroundColor = '#9CA2B8';
+            // Usuario NO logueado - mostrar botón "Iniciar sesión" (estilo index.html)
+            avatarDiv.innerHTML = 'Iniciar sesión';
+            avatarDiv.style.backgroundColor = 'transparent';
+            avatarDiv.style.color = 'rgb(2, 90, 138)';
+            avatarDiv.style.border = '2px solid rgb(2, 90, 138)';
+            avatarDiv.style.borderRadius = '30px';
+            avatarDiv.style.fontSize = '0.8rem';
+            avatarDiv.style.fontWeight = '600';
+            avatarDiv.style.width = 'auto';
+            avatarDiv.style.height = 'auto';
+            avatarDiv.style.padding = '0.4rem 1rem';
+            avatarDiv.style.display = 'inline-flex';
+            avatarDiv.title = 'Iniciar sesión';
             if (menuPromocion) menuPromocion.style.display = 'none';
         }
     }
@@ -424,8 +600,25 @@ function initNotifications() {
     const notifBtn = document.getElementById('notificationsBtn');
     if (notifBtn) {
         notifBtn.addEventListener('click', () => {
-            alert('Notificaciones: Próximamente podrás recibir alertas.');
+            alert('📢 Notificaciones: Próximamente podrás recibir alertas de tus eventos favoritos.');
         });
+    }
+}
+
+// ==================== CONFIGURAR ENLACES DE CATEGORÍAS ====================
+function setupCategoriaLinks() {
+    const subMenuLinks = document.querySelectorAll('.sub-menu-link');
+    subMenuLinks.forEach(link => {
+        link.removeEventListener('click', setupClick);
+        link.addEventListener('click', setupClick);
+    });
+    
+    function setupClick(e) {
+        e.preventDefault();
+        const categoria = this.getAttribute('data-categoria');
+        if (categoria) {
+            window.location.href = `categoria.html?nombre=${encodeURIComponent(categoria)}`;
+        }
     }
 }
 
@@ -436,6 +629,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initAvatar();
     initSearch();
     initNotifications();
+    setupCategoriaLinks();
     
     const themeToggleBtn = document.getElementById('themeToggleBtn');
     if (themeToggleBtn) {
@@ -445,44 +639,4 @@ document.addEventListener('DOMContentLoaded', () => {
             applyTheme();
         });
     }
-});
-
-// ==================== FUNCIONES COMPLEMENTARIAS ====================
-function formatFechaShort(fechaStr) {
-    const fecha = new Date(fechaStr);
-    return fecha.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
-}
-
-function formatFechaDDMMYYYY(fechaStr) {
-    const fecha = new Date(fechaStr);
-    const dia = fecha.getDate().toString().padStart(2, '0');
-    const mes = (fecha.getMonth() + 1).toString().padStart(2, '0');
-    const anio = fecha.getFullYear();
-    return `${dia}/${mes}/${anio}`;
-}
-
-function getIconoCategoria(categoria) {
-    const iconos = {
-        'Conciertos': '🎵', 'Teatro': '🎭', 'Cine': '🎬', 'Exposiciones': '🖼️',
-        'Danza': '💃', 'Libros': '📚', 'Festival': '🎉', 'Infantiles': '🧸',
-        'Deportes': '⚽', 'Talleres': '🔧', 'Museos': '🏛️', 'Ferias': '🛍️', 'Farándula': '✨'
-    };
-    return iconos[categoria] || '📌';
-}
-
-function setupCategoriaLinks() {
-    const subMenuLinks = document.querySelectorAll('.sub-menu-link');
-    subMenuLinks.forEach(link => {
-        link.addEventListener('click', (e) => {
-            e.preventDefault();
-            const categoria = link.getAttribute('data-categoria');
-            if (categoria) {
-                window.location.href = `categoria.html?nombre=${encodeURIComponent(categoria)}`;
-            }
-        });
-    });
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-    setupCategoriaLinks();
 });

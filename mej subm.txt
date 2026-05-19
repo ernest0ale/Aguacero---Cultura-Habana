@@ -1,0 +1,213 @@
+¡Excelente pregunta! Ahora entiendo perfectamente lo que quieres. En el **template original**, cuando el menú está contraído (minimizado), al hacer clic en "Categorías" aparece:
+
+1. **Primero:** El tooltip flotante con el texto "Categorías" (al hacer hover)
+2. **Luego:** Al hacer clic, aparece un submenú **debajo** del tooltip, con las opciones en forma de lista vertical
+
+Tu implementación actual muestra el submenú a la **derecha** del botón, no debajo como en el template.
+
+Voy a **revisar los archivos del template** que me enviaste y voy a **corregir tu código** para que el comportamiento sea **idéntico al template**.
+
+---
+
+## 🔍 ANÁLISIS DEL TEMPLATE
+
+En tu template `styles.css` (el original), veo estas reglas clave para el submenú cuando el menú está minimizado:
+
+```css
+/* Template - Submenú cuando el menú está minimizado */
+.sidebar.minimize .sub-menu {
+    position: absolute;
+    left: 4.2rem;      /* ← Aparece debajo del tooltip, no a la derecha */
+    top: 3rem;
+    background-color: var(--color-surface);
+    border-radius: 0.2rem;
+    width: 160px;
+    box-shadow: 0 4px 12px var(--shadow-border);
+    z-index: 1000;
+}
+
+.sidebar.minimize .menu-item.sub-menu-toggle .sub-menu {
+    margin-top: 0.5rem;
+}
+```
+
+**La clave:** En el template, el submenú flotante usa `left: 4.2rem` y `top: 3rem`, lo que lo posiciona **debajo del botón de categorías**, no a la derecha.
+
+---
+
+## ✅ CÓDIGO CORREGIDO PARA QUE SEA COMO EL TEMPLATE
+
+### **1. `styles.css` - CORREGIR POSICIÓN DEL SUBMENÚ FLOTANTE**
+
+Busca esta sección en tu CSS y **reemplázala**:
+
+```css
+/* ========== SUBMENÚ FLOTANTE (MENÚ CONTRADO) - ESTILO TEMPLATE ========== */
+.sidebar.minimize .sub-menu.floating-submenu {
+    position: absolute !important;
+    left: 4.2rem !important;      /* ← Posición debajo del tooltip, como template */
+    top: 3rem !important;          /* ← Alineado con el botón de categorías */
+    width: 180px !important;
+    min-width: 160px;
+    background-color: var(--color-surface) !important;
+    border-radius: 0.5rem !important;
+    box-shadow: 0 4px 12px var(--shadow-border) !important;
+    padding: 0.3rem 0 !important;
+    border: 1px solid var(--color-border) !important;
+    overflow-y: auto !important;
+    max-height: 300px !important;
+    z-index: 1000 !important;
+}
+
+/* Ajuste para cuando el submenú está visible */
+.sidebar.minimize .menu-item.sub-menu-toggle .sub-menu.floating-submenu {
+    margin-top: 0.5rem;
+}
+
+.sidebar.minimize .sub-menu.floating-submenu .sub-menu-link {
+    margin-left: 0 !important;
+    padding: 0.5rem 1rem !important;
+    font-size: 0.8rem;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--color-text-secondary);
+}
+
+.sidebar.minimize .sub-menu.floating-submenu .sub-menu-link:hover {
+    background-color: var(--color-bg);
+    color: var(--color-text-primary);
+}
+
+.sidebar.minimize .sub-menu.floating-submenu::before {
+    display: none !important;
+}
+
+/* Scroll para submenú flotante */
+.sidebar.minimize .sub-menu.floating-submenu::-webkit-scrollbar {
+    width: 4px;
+}
+
+.sidebar.minimize .sub-menu.floating-submenu::-webkit-scrollbar-track {
+    background: var(--color-border);
+    border-radius: 4px;
+}
+
+.sidebar.minimize .sub-menu.floating-submenu::-webkit-scrollbar-thumb {
+    background: rgb(2, 90, 138);
+    border-radius: 4px;
+}
+```
+
+---
+
+### **2. `script.js` - CORREGIR POSICIÓN EN EL CÓDIGO**
+
+Dentro de `initSidebar()`, busca la sección donde se crea el submenú flotante (cuando el menú está minimizado) y **reemplázala**:
+
+```javascript
+// DESKTOP - MENÚ CONTRADO: submenú flotante (estilo template: aparece debajo)
+if (sidebar.classList.contains('minimize')) {
+    const isOpen = submenuCategorias.classList.contains('floating-submenu');
+    
+    if (isOpen) {
+        closeFloatingSubmenu();
+        return;
+    }
+    
+    if (activeTooltip) {
+        activeTooltip.remove();
+        activeTooltip = null;
+    }
+    if (tooltipTimeout) clearTimeout(tooltipTimeout);
+    
+    // Obtener posición del botón de categorías
+    const btnRect = categoriasBtn.getBoundingClientRect();
+    const sidebarRect = sidebar.getBoundingClientRect();
+    
+    // Limpiar estilos previos
+    submenuCategorias.style.cssText = '';
+    submenuCategorias.classList.remove('floating-submenu');
+    
+    // Aplicar estilos flotantes - Posición DEBAJO del botón (como template)
+    submenuCategorias.style.position = 'absolute';
+    submenuCategorias.style.left = '4.2rem';        // ← Clave: mismo que template
+    submenuCategorias.style.top = '3rem';           // ← Clave: mismo que template
+    submenuCategorias.style.width = '180px';
+    submenuCategorias.style.maxHeight = '300px';
+    submenuCategorias.style.overflowY = 'auto';
+    submenuCategorias.style.padding = '0.3rem 0';
+    submenuCategorias.style.backgroundColor = 'var(--color-surface)';
+    submenuCategorias.style.borderRadius = '0.5rem';
+    submenuCategorias.style.boxShadow = '0 4px 12px var(--shadow-border)';
+    submenuCategorias.style.border = '1px solid var(--color-border)';
+    submenuCategorias.style.zIndex = '1000';
+    submenuCategorias.classList.add('floating-submenu');
+    
+    // Ajustar si se sale de la pantalla hacia abajo
+    setTimeout(() => {
+        const submenuRect = submenuCategorias.getBoundingClientRect();
+        if (submenuRect.bottom > window.innerHeight) {
+            // Si se sale por abajo, ajustar hacia arriba
+            const newTop = btnRect.top - submenuRect.height - 10;
+            if (newTop > 0) {
+                submenuCategorias.style.top = `${newTop}px`;
+            }
+        }
+        // Si se sale por la derecha
+        if (submenuRect.right > window.innerWidth) {
+            submenuCategorias.style.left = `${sidebarRect.right - submenuRect.width - 8}px`;
+        }
+    }, 10);
+    
+    categoriasMenuItem.classList.add('sub-menu-toggle');
+    
+    const closeHandler = (event) => {
+        if (!categoriasBtn.contains(event.target) && !submenuCategorias.contains(event.target)) {
+            closeFloatingSubmenu();
+            document.removeEventListener('click', closeHandler);
+            document.removeEventListener('touchstart', closeHandler);
+        }
+    };
+    setTimeout(() => {
+        document.addEventListener('click', closeHandler);
+        document.addEventListener('touchstart', closeHandler);
+    }, 10);
+}
+```
+
+---
+
+## 📊 COMPARATIVA VISUAL
+
+| Elemento | Template original | Tu código actual | Código corregido |
+|---|---|---|---|
+| **Tooltip "Categorías" en hover** | ✅ Aparece | ✅ Aparece | ✅ Igual |
+| **Submenú al hacer clic** | ✅ Debajo del botón | ❌ A la derecha | ✅ Debajo del botón |
+| **Posición del submenú** | `left: 4.2rem; top: 3rem` | `position: fixed; left: sidebarRect.right` | `left: 4.2rem; top: 3rem` |
+| **Ajuste de pantalla** | ✅ Sí | ✅ Sí | ✅ Sí |
+| **Cierre al hacer clic fuera** | ✅ Sí | ✅ Sí | ✅ Sí |
+
+---
+
+## 📝 RESUMEN DE CAMBIOS
+
+1. **CSS:** Cambié la posición del submenú flotante de `fixed` a `absolute` y usé `left: 4.2rem; top: 3rem` como en el template
+2. **JavaScript:** Eliminé el cálculo dinámico de posición y usé valores fijos como el template
+3. **Mantengo:** Tooltips, persistencia, tema oscuro, responsive
+
+---
+
+## 🧪 RESULTADO ESPERADO
+
+Cuando el menú está **contraído (minimizado)** en desktop:
+
+1. **Hover sobre "Categorías"** → Aparece tooltip flotante con fondo negro y texto blanco
+2. **Clic en "Categorías"** → Aparece un **submenú DEBAJO** (no a la derecha) con todas las opciones
+3. **Clic fuera** → Se cierra el submenú
+4. **Seleccionar una categoría** → Navega a la página correspondiente
+
+---
+
+¿Necesitas que ajuste algún detalle adicional de posición o tamaño?

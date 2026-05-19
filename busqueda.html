@@ -55,19 +55,19 @@
                         <img class="dropdown-light" src="resources/icons_light/chevron-down.png"><img class="dropdown-dark" src="resources/icons_dark/chevron-down.png" style="display:none;">
                     </a>
                     <ul class="sub-menu" id="submenuCategorias">
-                        <li><a href="#" class="sub-menu-link">Conciertos</a></li>
-                        <li><a href="#" class="sub-menu-link">Teatro</a></li>
-                        <li><a href="#" class="sub-menu-link">Cine</a></li>
-                        <li><a href="#" class="sub-menu-link">Exposiciones</a></li>
-                        <li><a href="#" class="sub-menu-link">Danza</a></li>
-                        <li><a href="#" class="sub-menu-link">Libros</a></li>
-                        <li><a href="#" class="sub-menu-link">Festival</a></li>
-                        <li><a href="#" class="sub-menu-link">Infantiles</a></li>
-                        <li><a href="#" class="sub-menu-link">Deportes</a></li>
-                        <li><a href="#" class="sub-menu-link">Talleres</a></li>
-                        <li><a href="#" class="sub-menu-link">Museos</a></li>
-                        <li><a href="#" class="sub-menu-link">Ferias</a></li>
-                        <li><a href="#" class="sub-menu-link">Farándula</a></li>
+                        <li><a href="#" class="sub-menu-link" data-categoria="Conciertos">Conciertos</a></li>
+                        <li><a href="#" class="sub-menu-link" data-categoria="Teatro">Teatro</a></li>
+                        <li><a href="#" class="sub-menu-link" data-categoria="Cine">Cine</a></li>
+                        <li><a href="#" class="sub-menu-link" data-categoria="Exposiciones">Exposiciones</a></li>
+                        <li><a href="#" class="sub-menu-link" data-categoria="Danza">Danza</a></li>
+                        <li><a href="#" class="sub-menu-link" data-categoria="Libros">Libros</a></li>
+                        <li><a href="#" class="sub-menu-link" data-categoria="Festival">Festival</a></li>
+                        <li><a href="#" class="sub-menu-link" data-categoria="Infantiles">Infantiles</a></li>
+                        <li><a href="#" class="sub-menu-link" data-categoria="Deportes">Deportes</a></li>
+                        <li><a href="#" class="sub-menu-link" data-categoria="Talleres">Talleres</a></li>
+                        <li><a href="#" class="sub-menu-link" data-categoria="Museos">Museos</a></li>
+                        <li><a href="#" class="sub-menu-link" data-categoria="Ferias">Ferias</a></li>
+                        <li><a href="#" class="sub-menu-link" data-categoria="Farándula">Farándula</a></li>
                     </ul>
                 </li>
                 <li class="menu-item"><a href="calendario.html" class="menu-link"><img class="calendar-light" src="resources/icons_light/calendar-alt.png"><img class="calendar-dark" src="resources/icons_dark/calendar-alt.png" style="display:none;"><span>Calendario</span></a></li>
@@ -116,9 +116,77 @@
                 
                 <h3>Categorías</h3>
                 <div id="filtros-categorias" class="categorias-group"></div>
+                
+                <!-- Línea divisora -->
+                <hr class="divisor-filtros">
+                
+                <!-- Características adicionales -->
+                <h3>Características</h3>
+                <div class="categorias-group">
+                    <label class="categoria-checkbox">
+                        <input type="checkbox" id="filtro-apto-menores"> 👶 Apto para menores
+                    </label>
+                    <label class="categoria-checkbox">
+                        <input type="checkbox" id="filtro-aire-libre"> 🌳 Al aire libre
+                    </label>
+                </div>
             </div>
         </div>
     </div>
+
+    <footer class="footer">
+        <div class="footer-container">
+            <!-- Columna 1: Logo y descripción -->
+            <div class="footer-column">
+                <div class="footer-logo">
+                    <img src="resources/aguacero_cuba_logo_trasnparente.png" alt="Cultura Habana">
+                    <span>Cultura Habana</span>
+                </div>
+                <p class="footer-description">
+                    Los mejores planes en La Habana se encuentran bajo este Aguacero.<br>
+                    Deja la sombrilla en casa, ¡no te pierdas ni una gota de cultura!
+                </p>
+            </div>
+
+            <!-- Columna 2: Enlaces rápidos -->
+            <div class="footer-column">
+                <h3>Explorar</h3>
+                <ul class="footer-links">
+                    <li><a href="inicio.html">Inicio</a></li>
+                    <li><a href="calendario.html">Calendario</a></li>
+                    <li><a href="mapa.html">Mapa</a></li>
+
+                </ul>
+            </div>
+
+            <!-- Columna 3: Soporte / Legal -->
+            <div class="footer-column">
+                <h3>Legal</h3>
+                <ul class="footer-links">
+                    <li><a href="#" id="faqLink">Preguntas frecuentes</a></li>
+                    <li><a href="#" id="termsLink">Términos y condiciones</a></li>
+                    <li><a href="#" id="privacyLink">Política de privacidad</a></li>
+                    <li><a href="mailto:contacto@culturahabana.com">contacto@culturahabana.com</a></li>
+                </ul>
+            </div>
+
+            <!-- Columna 4: Redes sociales -->
+            <div class="footer-column">
+                <h3>Síguenos</h3>
+                <div class="footer-social">
+                    <a href="https://www.facebook.com/aguacerocuba" class="social-icon" target="_blank">Facebook</a>
+                    <a href="https://www.instagram.com/aguacero_cuba/" class="social-icon" target="_blank">Instagram</a>
+                    <a href="https://www.whatsapp.com/channel/0029VbApHoQKmCPX3VynJs2n" class="social-icon" target="_blank">WhatsApp</a>
+                    <a href="https://t.me/Aguacero" class="social-icon" target="_blank">Telegram</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            <p>&copy; 2025 Cultura Habana. Todos los derechos reservados.</p>
+            <p>Diseñado con ❤️ para La Habana</p>
+        </div>
+    </footer>
 
     <script src="data.js"></script>
     <script src="script.js"></script>
@@ -130,6 +198,18 @@
         document.getElementById('buscador-global').value = terminoBusqueda;
         
         let categoriasSeleccionadas = [];
+        const filtroAptoMenores = document.getElementById('filtro-apto-menores');
+        const filtroAireLibre = document.getElementById('filtro-aire-libre');
+        
+        function aplicarFiltrosAdicionales(eventos) {
+            if (filtroAptoMenores && filtroAptoMenores.checked) {
+                eventos = eventos.filter(e => e.aptoMenores === true);
+            }
+            if (filtroAireLibre && filtroAireLibre.checked) {
+                eventos = eventos.filter(e => e.aireLibre === true);
+            }
+            return eventos;
+        }
         
         function renderizarFiltros() {
             const categorias = getCategoriasConEventos();
@@ -155,6 +235,8 @@
             if (categoriasSeleccionadas.length > 0) {
                 eventos = eventos.filter(e => categoriasSeleccionadas.includes(e.categoria));
             }
+            
+            eventos = aplicarFiltrosAdicionales(eventos);
             
             const fechaInicio = document.getElementById('fecha-inicio')?.value;
             const fechaFin = document.getElementById('fecha-fin')?.value;
@@ -190,18 +272,26 @@
                 return;
             }
             
-            container.innerHTML = eventos.map(evento => `
-                <div class="evento-resultado-item" onclick="window.location.href='detallesEvento.html?id=${evento.id}'">
-                    <img class="evento-resultado-img" src="${evento.poster}" onerror="this.src='https://picsum.photos/id/100/60/60'">
-                    <div class="evento-resultado-info">
-                        <h4>${evento.nombre}</h4>
-                        <p class="fecha">${formatFechaShort(evento.fechaInicio)} ${evento.horaInicio ? '· ' + evento.horaInicio.substring(0,5) : ''}</p>
-                        <span class="categoria-badge">${evento.categoria}</span>
+            container.innerHTML = eventos.map(evento => {
+                const menores = getEtiquetaAptoMenores(evento.aptoMenores);
+                const aire = getEtiquetaAireLibre(evento.aireLibre);
+                return `
+                    <div class="evento-resultado-item" onclick="window.location.href='detallesEvento.html?id=${evento.id}'">
+                        <img class="evento-resultado-img" src="${evento.poster}" onerror="this.src='https://picsum.photos/id/100/60/60'">
+                        <div class="evento-resultado-info">
+                            <h4>${evento.nombre}</h4>
+                            <p class="fecha">${formatFechaShort(evento.fechaInicio)} ${evento.horaInicio ? '· ' + evento.horaInicio.substring(0,5) : ''}</p>
+                            <span class="categoria-badge">${evento.categoria}</span>
+                            <span class="${menores.clase}">${menores.texto}</span>
+                            <span class="${aire.clase}">${aire.texto}</span>
+                        </div>
                     </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
         }
         
+        filtroAptoMenores?.addEventListener('change', renderizarResultados);
+        filtroAireLibre?.addEventListener('change', renderizarResultados);
         document.getElementById('fecha-inicio')?.addEventListener('change', renderizarResultados);
         document.getElementById('fecha-fin')?.addEventListener('change', renderizarResultados);
         document.getElementById('orden-eventos')?.addEventListener('change', renderizarResultados);

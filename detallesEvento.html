@@ -11,7 +11,6 @@
 </head>
 <body>
 
-    <!-- Barra superior fija -->
     <div class="top-bar">
         <div class="top-bar-left">
             <button class="menu-toggle-btn" id="menuToggleBtn">
@@ -46,7 +45,6 @@
         </div>
     </div>
 
-    <!-- Menú lateral -->
     <div class="sidebar" id="sidebar">
         <div class="menu_container">
             <ul class="menu">
@@ -57,19 +55,19 @@
                         <img class="dropdown-light" src="resources/icons_light/chevron-down.png"><img class="dropdown-dark" src="resources/icons_dark/chevron-down.png" style="display:none;">
                     </a>
                     <ul class="sub-menu" id="submenuCategorias">
-                        <li><a href="#" class="sub-menu-link">Conciertos</a></li>
-                        <li><a href="#" class="sub-menu-link">Teatro</a></li>
-                        <li><a href="#" class="sub-menu-link">Cine</a></li>
-                        <li><a href="#" class="sub-menu-link">Exposiciones</a></li>
-                        <li><a href="#" class="sub-menu-link">Danza</a></li>
-                        <li><a href="#" class="sub-menu-link">Libros</a></li>
-                        <li><a href="#" class="sub-menu-link">Festival</a></li>
-                        <li><a href="#" class="sub-menu-link">Infantiles</a></li>
-                        <li><a href="#" class="sub-menu-link">Deportes</a></li>
-                        <li><a href="#" class="sub-menu-link">Talleres</a></li>
-                        <li><a href="#" class="sub-menu-link">Museos</a></li>
-                        <li><a href="#" class="sub-menu-link">Ferias</a></li>
-                        <li><a href="#" class="sub-menu-link">Farándula</a></li>
+                        <li><a href="#" class="sub-menu-link" data-categoria="Conciertos">Conciertos</a></li>
+                        <li><a href="#" class="sub-menu-link" data-categoria="Teatro">Teatro</a></li>
+                        <li><a href="#" class="sub-menu-link" data-categoria="Cine">Cine</a></li>
+                        <li><a href="#" class="sub-menu-link" data-categoria="Exposiciones">Exposiciones</a></li>
+                        <li><a href="#" class="sub-menu-link" data-categoria="Danza">Danza</a></li>
+                        <li><a href="#" class="sub-menu-link" data-categoria="Libros">Libros</a></li>
+                        <li><a href="#" class="sub-menu-link" data-categoria="Festival">Festival</a></li>
+                        <li><a href="#" class="sub-menu-link" data-categoria="Infantiles">Infantiles</a></li>
+                        <li><a href="#" class="sub-menu-link" data-categoria="Deportes">Deportes</a></li>
+                        <li><a href="#" class="sub-menu-link" data-categoria="Talleres">Talleres</a></li>
+                        <li><a href="#" class="sub-menu-link" data-categoria="Museos">Museos</a></li>
+                        <li><a href="#" class="sub-menu-link" data-categoria="Ferias">Ferias</a></li>
+                        <li><a href="#" class="sub-menu-link" data-categoria="Farándula">Farándula</a></li>
                     </ul>
                 </li>
                 <li class="menu-item"><a href="calendario.html" class="menu-link"><img class="calendar-light" src="resources/icons_light/calendar-alt.png"><img class="calendar-dark" src="resources/icons_dark/calendar-alt.png" style="display:none;"><span>Calendario</span></a></li>
@@ -79,7 +77,6 @@
         </div>
     </div>
 
-    <!-- Contenido principal -->
     <div class="main-content">
         <div id="detalle-contenido">
             <div class="loading-spinner">Cargando evento...</div>
@@ -88,6 +85,60 @@
             <a href="javascript:history.back()" class="btn-volver">← Volver atrás</a>
         </div>
     </div>
+
+    <footer class="footer">
+        <div class="footer-container">
+            <!-- Columna 1: Logo y descripción -->
+            <div class="footer-column">
+                <div class="footer-logo">
+                    <img src="resources/aguacero_cuba_logo_trasnparente.png" alt="Cultura Habana">
+                    <span>Cultura Habana</span>
+                </div>
+                <p class="footer-description">
+                    Los mejores planes en La Habana se encuentran bajo este Aguacero.<br>
+                    Deja la sombrilla en casa, ¡no te pierdas ni una gota de cultura!
+                </p>
+            </div>
+
+            <!-- Columna 2: Enlaces rápidos -->
+            <div class="footer-column">
+                <h3>Explorar</h3>
+                <ul class="footer-links">
+                    <li><a href="inicio.html">Inicio</a></li>
+                    <li><a href="calendario.html">Calendario</a></li>
+                    <li><a href="mapa.html">Mapa</a></li>
+
+                </ul>
+            </div>
+
+            <!-- Columna 3: Soporte / Legal -->
+            <div class="footer-column">
+                <h3>Legal</h3>
+                <ul class="footer-links">
+                    <li><a href="#" id="faqLink">Preguntas frecuentes</a></li>
+                    <li><a href="#" id="termsLink">Términos y condiciones</a></li>
+                    <li><a href="#" id="privacyLink">Política de privacidad</a></li>
+                    <li><a href="mailto:contacto@culturahabana.com">contacto@culturahabana.com</a></li>
+                </ul>
+            </div>
+
+            <!-- Columna 4: Redes sociales -->
+            <div class="footer-column">
+                <h3>Síguenos</h3>
+                <div class="footer-social">
+                    <a href="https://www.facebook.com/aguacerocuba" class="social-icon" target="_blank">Facebook</a>
+                    <a href="https://www.instagram.com/aguacero_cuba/" class="social-icon" target="_blank">Instagram</a>
+                    <a href="https://www.whatsapp.com/channel/0029VbApHoQKmCPX3VynJs2n" class="social-icon" target="_blank">WhatsApp</a>
+                    <a href="https://t.me/Aguacero" class="social-icon" target="_blank">Telegram</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            <p>&copy; 2025 Cultura Habana. Todos los derechos reservados.</p>
+            <p>Diseñado con ❤️ para La Habana</p>
+        </div>
+    </footer>
 
     <script src="data.js"></script>
     <script src="script.js"></script>
@@ -99,9 +150,46 @@
             return new Date(fechaStr).toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
         }
         
+        // Función para obtener la URL del tile según el tema
+        function getTileUrlDetalle() {
+            if (isDarkModeDetalle) {
+                return 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
+            } else {
+                return 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
+            }
+        }
+        
+        function getAttributionDetalle() {
+            if (isDarkModeDetalle) {
+                return '&copy; <a href="https://carto.com/">CartoDB</a> (Dark Matter) | &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>';
+            } else {
+                return '&copy; <a href="https://carto.com/">CartoDB</a> (Voyager) | &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>';
+            }
+        }
+        
+        function applyThemeDetalle() {
+            if (window.detalleMap) {
+                window.detalleMap.eachLayer((layer) => {
+                    if (layer._url && (layer._url.includes('basemaps') || layer._url.includes('cartocdn'))) {
+                        window.detalleMap.removeLayer(layer);
+                    }
+                });
+                
+                const newTileLayer = L.tileLayer(getTileUrlDetalle(), {
+                    attribution: getAttributionDetalle(),
+                    minZoom: 10,
+                    maxZoom: 18,
+                    subdomains: 'abcd'
+                });
+                newTileLayer.addTo(window.detalleMap);
+            }
+        }
+        
         const urlParams = new URLSearchParams(window.location.search);
         const eventoId = urlParams.get('id');
         const evento = getEventoById(eventoId);
+        const menores = getEtiquetaAptoMenores(evento.aptoMenores);
+        const aire = getEtiquetaAireLibre(evento.aireLibre);
         
         if (evento) {
             const container = document.getElementById('detalle-contenido');
@@ -112,26 +200,26 @@
                         <span class="categoria-badge">${evento.categoria}</span>
                         <h1>${evento.nombre}</h1>
                         <div class="detalle-fechas">
-                            <p> ${formatDate(evento.fechaInicio)} ${evento.horaInicio ? '· ' + evento.horaInicio : ''}</p>
-                            ${evento.fechaFin && evento.fechaFin !== evento.fechaInicio ? `<p>Hasta: ${formatDate(evento.fechaFin)} ${evento.horaFin ? '· ' + evento.horaFin : ''}</p>` : ''}
+                            <p> 📅 ${formatDate(evento.fechaInicio)} ${evento.horaInicio ? '· ' + evento.horaInicio : ''}</p>
+                            ${evento.fechaFin && evento.fechaFin !== evento.fechaInicio ? `<p>📅 Hasta: ${formatDate(evento.fechaFin)} ${evento.horaFin ? '· ' + evento.horaFin : ''}</p>` : ''}
                         </div>
-                        <div class="detalle-precio">Precio: ${evento.precio === 0 ? 'Gratis' : `$${evento.precio} CUP`}</div>
+                        <div class="detalle-precio">💰 Precio: ${evento.precio === 0 ? 'Gratis' : `$${evento.precio} CUP`}</div>
                         <div class="detalle-ubicacion">
-                            <p><strong>Ubicación:</strong> ${evento.ubicacion || evento.direccion || 'No especificada'}</p>
-                            <p><strong>Sede:</strong> ${evento.sede || 'No especificada'}</p>
-                            <p><strong>Municipio:</strong> ${evento.municipio || 'No especificado'}</p>
+                            <p><strong>📍 Ubicación:</strong> ${evento.ubicacion || evento.direccion || 'No especificada'}</p>
+                            <p><strong>🏢 Sede:</strong> ${evento.sede || 'No especificada'}</p>
+                            <p><strong>🏙️ Municipio:</strong> ${evento.municipio || 'No especificado'}</p>
                         </div>
                         <div class="detalle-descripcion">
-                            <h3>Descripción</h3>
+                            <h3>📖 Descripción</h3>
                             <p>${evento.descripcion || 'Sin descripción disponible'}</p>
                         </div>
                         <div class="detalle-caracteristicas">
-                            ${evento.aptoMenores ? '<span class="caracteristica"> Apto para menores</span>' : ''}
-                            ${evento.aireLibre ? '<span class="caracteristica"> Al aire libre</span>' : ''}
-                            ${evento.posibilidadReserva ? '<span class="caracteristica"> Posibilidad de reserva</span>' : ''}
+                            <span class="caracteristica ${menores.clase}" style="background: transparent; border: 1px solid currentColor;">${menores.texto}</span>
+                            <span class="caracteristica ${aire.clase}" style="background: transparent; border: 1px solid currentColor;">${aire.texto}</span>
+                            ${evento.posibilidadReserva ? '<span class="caracteristica">📞 Posibilidad de reserva</span>' : ''}
                         </div>
                         <div class="detalle-contacto">
-                            <h3>Contacto</h3>
+                            <h3>📞 Contacto</h3>
                             <p><strong>Organizador:</strong> ${evento.organizador || 'No especificado'}</p>
                             <p><strong>Teléfono:</strong> ${evento.telefono || 'No disponible'}</p>
                             ${evento.contactoReserva ? `<p><strong>Reservas:</strong> ${evento.contactoReserva}</p>` : ''}
@@ -139,27 +227,39 @@
                     </div>
                 </div>
                 <div class="mapa-container">
-                    <h3>Mapa</h3>
-                    <div id="mapa-detalle" style="height: 300px; width: 100%; border-radius: 16px;"></div>
+                    <h3>🗺️ Mapa</h3>
+                    <div id="mapa-detalle" style="height: 350px; width: 100%; border-radius: 16px;"></div>
                 </div>
             `;
             
             if (evento.lat && evento.lng) {
                 setTimeout(() => {
-                    const tileUrl = isDarkModeDetalle ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png' : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
-                    const mapDetalle = L.map('mapa-detalle').setView([evento.lat, evento.lng], 15);
-                    L.tileLayer(tileUrl, {
-                        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>'
-                    }).addTo(mapDetalle);
-                    L.marker([evento.lat, evento.lng]).addTo(mapDetalle).bindPopup(`<b>${evento.nombre}</b><br>${evento.ubicacion || evento.direccion}`).openPopup();
+                    window.detalleMap = L.map('mapa-detalle').setView([evento.lat, evento.lng], 15);
+                    
+                    L.tileLayer(getTileUrlDetalle(), {
+                        attribution: getAttributionDetalle(),
+                        minZoom: 10,
+                        maxZoom: 18,
+                        subdomains: 'abcd'
+                    }).addTo(window.detalleMap);
+                    
+                    L.marker([evento.lat, evento.lng]).addTo(window.detalleMap)
+                        .bindPopup(`<b>${evento.nombre}</b><br>${evento.ubicacion || evento.direccion}`)
+                        .openPopup();
                 }, 200);
             } else {
                 const mapaContainer = document.getElementById('mapa-detalle');
-                if (mapaContainer) mapaContainer.innerHTML = '<p style="padding: 1rem; text-align: center;"> Ubicación no disponible para este evento</p>';
+                if (mapaContainer) mapaContainer.innerHTML = '<p style="padding: 1rem; text-align: center;">📍 Ubicación no disponible para este evento</p>';
             }
         } else {
             document.getElementById('detalle-contenido').innerHTML = '<div class="loading-spinner">Evento no encontrado</div>';
         }
+        
+        document.getElementById('themeToggleBtn')?.addEventListener('click', () => {
+            isDarkModeDetalle = !isDarkModeDetalle;
+            localStorage.setItem('darkMode', isDarkModeDetalle);
+            applyThemeDetalle();
+        });
     </script>
 </body>
 </html>

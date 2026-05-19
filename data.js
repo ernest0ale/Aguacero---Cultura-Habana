@@ -245,32 +245,22 @@ function getEventosPorFecha(fechaStr) {
     if (!fechaStr) return [];
     const eventos = getEventos();
     
-    // Convertir fechaStr de formato "dd/mm/aaaa" a objeto Date
     const partes = fechaStr.split('/');
     if (partes.length !== 3) return [];
     
-    // partes[0] = día, partes[1] = mes, partes[2] = año
     const dia = parseInt(partes[0]);
-    const mes = parseInt(partes[1]) - 1; // Los meses en JS van de 0 a 11
+    const mes = parseInt(partes[1]) - 1;
     const anio = parseInt(partes[2]);
     
     const fechaBuscar = new Date(anio, mes, dia);
     fechaBuscar.setHours(0, 0, 0, 0);
     
-    console.log("🔍 Buscando eventos para fecha:", fechaBuscar.toLocaleDateString('es-ES'));
-    
     const resultados = eventos.filter(evento => {
         const fechaEvento = new Date(evento.fechaInicio);
         fechaEvento.setHours(0, 0, 0, 0);
-        
-        const coincide = fechaEvento.getTime() === fechaBuscar.getTime();
-        if (coincide) {
-            console.log("✅ Coincide:", evento.nombre, evento.fechaInicio);
-        }
-        return coincide;
+        return fechaEvento.getTime() === fechaBuscar.getTime();
     });
     
-    console.log(`📊 Encontrados ${resultados.length} eventos`);
     return resultados.sort((a, b) => new Date(a.fechaInicio) - new Date(b.fechaInicio));
 }
 
@@ -283,6 +273,54 @@ function buscarEventos(termino) {
         (e.ubicacion && e.ubicacion.toLowerCase().includes(t))
     );
 }
+
+// ==================== ELIMINACIÓN AUTOMÁTICA DE EVENTOS ====================
+function limpiarEventosExpirados() {
+    const eventos = getEventos();
+    const ahora = new Date();
+    let eventosModificados = false;
+    
+    const eventosFiltrados = eventos.filter(evento => {
+        let fechaExpiracion;
+        
+        if (evento.fechaFin && evento.fechaFin !== evento.fechaInicio) {
+            fechaExpiracion = new Date(evento.fechaFin);
+            if (evento.horaFin) {
+                const [horas, minutos] = evento.horaFin.split(':');
+                fechaExpiracion.setHours(parseInt(horas) + 8, parseInt(minutos));
+            } else {
+                fechaExpiracion.setHours(23, 59, 59);
+            }
+        } else {
+            fechaExpiracion = new Date(evento.fechaInicio);
+            if (evento.horaFin) {
+                const [horas, minutos] = evento.horaFin.split(':');
+                fechaExpiracion.setHours(parseInt(horas) + 8, parseInt(minutos));
+            } else if (evento.horaInicio) {
+                const [horas, minutos] = evento.horaInicio.split(':');
+                fechaExpiracion.setHours(parseInt(horas) + 12, parseInt(minutos));
+            } else {
+                fechaExpiracion.setHours(23, 59, 59);
+            }
+        }
+        
+        if (ahora > fechaExpiracion) {
+            console.log(`🗑️ Eliminando evento expirado: ${evento.nombre}`);
+            eventosModificados = true;
+            return false;
+        }
+        return true;
+    });
+    
+    if (eventosModificados) {
+        guardarEventos(eventosFiltrados);
+        console.log('✅ Eventos expirados eliminados correctamente');
+    }
+}
+
+// Ejecutar al cargar la página y cada hora
+limpiarEventosExpirados();
+setInterval(limpiarEventosExpirados, 60 * 60 * 1000);
 
 function formatFechaShort(fechaStr) {
     const fecha = new Date(fechaStr);
@@ -307,3 +345,20 @@ function getIcono(categoria) {
 }
 
 inicializarDatos();
+
+// ==================== FUNCIONES PARA OBTENER ETIQUETAS DE CARACTERÍSTICAS ====================
+function getEtiquetaAptoMenores(aptoMenores) {
+    if (aptoMenores === true) {
+        return { texto: '👶 Apto para menores', clase: 'badge-menores-si' };
+    } else {
+        return { texto: '🔞 Solo adultos', clase: 'badge-menores-no' };
+    }
+}
+
+function getEtiquetaAireLibre(aireLibre) {
+    if (aireLibre === true) {
+        return { texto: '🌳 Al aire libre', clase: 'badge-aire-si' };
+    } else {
+        return { texto: '🏠 Bajo techo', clase: 'badge-aire-no' };
+    }
+}

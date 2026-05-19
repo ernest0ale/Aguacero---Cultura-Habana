@@ -51,6 +51,25 @@
             color: var(--color-text-primary);
             font-size: 1rem;
         }
+        .password-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        .password-wrapper input {
+            width: 100%;
+            padding: 0.8rem;
+            padding-right: 3rem;
+        }
+        .toggle-password {
+            position: absolute;
+            right: 12px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            color: var(--color-text-secondary);
+            background: none;
+            border: none;
+        }
         .btn-login {
             width: 100%;
             padding: 0.8rem;
@@ -66,6 +85,15 @@
         .btn-login:hover {
             background: rgb(2, 110, 168);
             transform: translateY(-2px);
+        }
+        .forgot-password {
+            text-align: right;
+            margin-bottom: 1rem;
+        }
+        .forgot-password a {
+            color: rgb(2, 90, 138);
+            text-decoration: none;
+            font-size: 0.85rem;
         }
         .register-link {
             text-align: center;
@@ -85,6 +113,104 @@
             margin-bottom: 1rem;
             text-align: center;
         }
+        
+        /* Modal de recuperación */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal.active {
+            display: flex;
+        }
+        .modal-card {
+            background: var(--color-surface);
+            border-radius: 24px;
+            padding: 2rem;
+            width: 90%;
+            max-width: 450px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .modal-card h2 {
+            margin-bottom: 1.5rem;
+            color: rgb(2, 90, 138);
+        }
+        .recovery-method {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .method-btn {
+            flex: 1;
+            padding: 0.8rem;
+            background: var(--color-bg);
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        .method-btn.active {
+            background: rgb(2, 90, 138);
+            color: white;
+            border-color: rgb(2, 90, 138);
+        }
+        .phone-input-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .phone-prefix-modal {
+            width: 70px;
+            padding: 0.8rem;
+            background: var(--color-bg);
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+        .phone-number-modal {
+            flex: 1;
+            padding: 0.8rem;
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            background: var(--color-bg);
+            color: var(--color-text-primary);
+            font-size: 1rem;
+        }
+        .code-info {
+            font-size: 0.8rem;
+            color: var(--color-text-secondary);
+            margin-top: 0.5rem;
+        }
+        .btn-secondary {
+            width: 100%;
+            padding: 0.8rem;
+            background: var(--color-border);
+            color: var(--color-text-primary);
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 0.5rem;
+        }
+        .method-email-input {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            background: var(--color-bg);
+            color: var(--color-text-primary);
+            font-size: 1rem;
+        }
     </style>
 </head>
 <body>
@@ -97,12 +223,19 @@
             
             <form id="login-form">
                 <div class="form-group">
-                    <label>Correo electrónico</label>
-                    <input type="email" id="email" placeholder="tucorreo@ejemplo.com" required autocomplete="email">
+                    <label>Correo electrónico o teléfono</label>
+                    <input type="text" id="loginIdentifier" placeholder="tucorreo@ejemplo.com o 51234567" required autocomplete="off">
+                    <small style="color: var(--color-text-secondary); font-size: 0.7rem;">Teléfono: solo los 8 dígitos después del +53</small>
                 </div>
                 <div class="form-group">
                     <label>Contraseña</label>
-                    <input type="password" id="password" placeholder="••••••••" required autocomplete="current-password">
+                    <div class="password-wrapper">
+                        <input type="password" id="password" placeholder="••••••••" required autocomplete="current-password">
+                        <button type="button" class="toggle-password" onclick="togglePassword('password')">👁️</button>
+                    </div>
+                </div>
+                <div class="forgot-password">
+                    <a href="#" id="forgotPasswordBtn">¿Olvidaste tu contraseña?</a>
                 </div>
                 <button type="submit" class="btn-login">Ingresar</button>
             </form>
@@ -116,31 +249,336 @@
         </div>
     </div>
 
+    <!-- Modal de recuperación de contraseña -->
+    <div id="recoveryModal" class="modal">
+        <div class="modal-card">
+            <h2>🔐 Recuperar contraseña</h2>
+            <div id="recoveryStep1">
+                <p style="margin-bottom: 1rem;">Selecciona cómo recibir el código de verificación:</p>
+                <div class="recovery-method">
+                    <div class="method-btn" data-method="email">📧 Correo</div>
+                    <div class="method-btn" data-method="phone">📱 Teléfono</div>
+                </div>
+                <div id="contact-input" style="margin-top: 1rem;"></div>
+                <button id="sendCodeBtn" class="btn-login">Enviar código</button>
+                <button class="btn-secondary" onclick="closeRecoveryModal()">Cancelar</button>
+            </div>
+            <div id="recoveryStep2" style="display: none;">
+                <p>Ingresa el código de verificación de 8 dígitos:</p>
+                <input type="text" id="verification-code" class="form-group" style="width:100%; padding:0.8rem; border-radius:12px;" placeholder="00000000" maxlength="8">
+                <div id="code-info" class="code-info"></div>
+                <button id="verifyCodeBtn" class="btn-login">Verificar código</button>
+                <button id="resendCodeBtn" class="btn-secondary" style="display:none;">Reenviar código</button>
+                <button class="btn-secondary" onclick="closeRecoveryModal()">Cancelar</button>
+            </div>
+            <div id="recoveryStep3" style="display: none;">
+                <p>Nueva contraseña:</p>
+                <div class="password-wrapper">
+                    <input type="password" id="new-password" placeholder="Nueva contraseña" style="width:100%; padding:0.8rem; border-radius:12px;">
+                    <button type="button" class="toggle-password" onclick="togglePassword('new-password')">👁️</button>
+                </div>
+                <p style="margin-top: 1rem;">Confirmar nueva contraseña:</p>
+                <div class="password-wrapper">
+                    <input type="password" id="confirm-password" placeholder="Confirmar contraseña" style="width:100%; padding:0.8rem; border-radius:12px;">
+                    <button type="button" class="toggle-password" onclick="togglePassword('confirm-password')">👁️</button>
+                </div>
+                <button id="resetPasswordBtn" class="btn-login" style="margin-top: 1rem;">Restablecer contraseña</button>
+                <button class="btn-secondary" onclick="closeRecoveryModal()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
     <script src="data.js"></script>
     <script>
-        // Verificar si ya hay sesión activa
-        if (getUsuarioActual()) {
-            window.location.href = 'inicio.html';
+        // ==================== TEMA OSCURO PERSISTENTE ====================
+        let isDarkMode = localStorage.getItem('darkMode') === 'true';
+        
+        function applyTheme() {
+            if (isDarkMode) {
+                document.body.classList.add('dark-mode');
+            } else {
+                document.body.classList.remove('dark-mode');
+            }
         }
         
+        applyTheme();
+        
+        // ==================== MOSTRAR/OCULTAR CONTRASEÑA ====================
+        function togglePassword(fieldId) {
+            const field = document.getElementById(fieldId);
+            if (field.type === 'password') {
+                field.type = 'text';
+            } else {
+                field.type = 'password';
+            }
+        }
+        
+        // ==================== FUNCIÓN PARA OBTENER IDENTIFICADOR NORMALIZADO ====================
+        function normalizarIdentificador(input) {
+            const trimmed = input.trim();
+            // Si es solo números (8 dígitos), devolver como teléfono con +53
+            if (/^\d{8}$/.test(trimmed)) {
+                return { type: 'phone', value: '+53 ' + trimmed };
+            }
+            // Si es email (contiene @)
+            if (trimmed.includes('@')) {
+                return { type: 'email', value: trimmed };
+            }
+            return null;
+        }
+        
+        // ==================== RECUPERACIÓN DE CONTRASEÑA ====================
+        let currentMethod = 'email';
+        let generatedCode = null;
+        let codeExpiry = null;
+        let resendAttempts = 0;
+        let resendBlockedUntil = null;
+        let userEmailForReset = null;
+        
+        const modal = document.getElementById('recoveryModal');
+        const step1 = document.getElementById('recoveryStep1');
+        const step2 = document.getElementById('recoveryStep2');
+        const step3 = document.getElementById('recoveryStep3');
+        const contactInputDiv = document.getElementById('contact-input');
+        const codeInfo = document.getElementById('code-info');
+        
+        function actualizarContactInput() {
+            if (currentMethod === 'email') {
+                contactInputDiv.innerHTML = `<input type="email" id="contact-value" class="method-email-input" placeholder="correo@ejemplo.com">`;
+            } else {
+                contactInputDiv.innerHTML = `
+                    <div class="phone-input-wrapper">
+                        <span class="phone-prefix-modal">+53</span>
+                        <input type="tel" id="contact-value" class="phone-number-modal" placeholder="5XXXXXXXX" maxlength="8">
+                    </div>
+                    <small style="color: var(--color-text-secondary); font-size: 0.7rem;">8 dígitos (ejemplo: 51234567)</small>
+                `;
+            }
+        }
+        
+        document.getElementById('forgotPasswordBtn').addEventListener('click', (e) => {
+            e.preventDefault();
+            modal.classList.add('active');
+            step1.style.display = 'block';
+            step2.style.display = 'none';
+            step3.style.display = 'none';
+            generatedCode = null;
+            codeExpiry = null;
+            actualizarContactInput();
+        });
+        
+        document.querySelectorAll('.method-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.method-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentMethod = btn.getAttribute('data-method');
+                actualizarContactInput();
+            });
+        });
+        document.querySelector('.method-btn').classList.add('active');
+        
+        function generateCode() {
+            return Math.floor(10000000 + Math.random() * 90000000).toString();
+        }
+        
+        document.getElementById('sendCodeBtn').addEventListener('click', () => {
+            let contactValue = document.getElementById('contact-value')?.value.trim();
+            if (!contactValue) {
+                mostrarError('Ingresa tu correo o teléfono');
+                return;
+            }
+            
+            const usuarios = getUsuarios();
+            let usuarioEncontrado = null;
+            
+            if (currentMethod === 'email') {
+                usuarioEncontrado = usuarios.find(u => u.email === contactValue);
+            } else {
+                if (!/^\d{8}$/.test(contactValue)) {
+                    mostrarError('Ingresa 8 dígitos válidos');
+                    return;
+                }
+                const telefonoCompleto = '+53 ' + contactValue;
+                usuarioEncontrado = usuarios.find(u => u.telefono === telefonoCompleto);
+            }
+            
+            if (!usuarioEncontrado) {
+                mostrarError('No se encontró una cuenta con esos datos');
+                return;
+            }
+            
+            userEmailForReset = usuarioEncontrado.email;
+            
+            if (resendBlockedUntil && new Date() < resendBlockedUntil) {
+                const minutesLeft = Math.ceil((resendBlockedUntil - new Date()) / 60000);
+                mostrarError(`Has excedido los intentos. Espera ${minutesLeft} minutos.`);
+                return;
+            }
+            
+            generatedCode = generateCode();
+            codeExpiry = new Date(Date.now() + 5 * 60000);
+            
+            const contactoMostrar = currentMethod === 'email' ? contactValue : `+53 ${contactValue}`;
+            alert(`🔐 Código de verificación (simulado): ${generatedCode}\n\nEn una implementación real, esto se enviaría a ${contactoMostrar}`);
+            
+            step1.style.display = 'none';
+            step2.style.display = 'block';
+            updateTimerDisplay();
+            
+            const timer = setInterval(() => {
+                if (!codeExpiry || new Date() > codeExpiry) {
+                    clearInterval(timer);
+                    codeInfo.innerHTML = '⏰ El código ha expirado. <a href="#" id="expired-resend">Solicita uno nuevo</a>';
+                    document.getElementById('expired-resend')?.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        resendCode();
+                    });
+                } else {
+                    updateTimerDisplay();
+                }
+            }, 1000);
+        });
+        
+        function updateTimerDisplay() {
+            if (codeExpiry) {
+                const remaining = Math.max(0, Math.floor((codeExpiry - new Date()) / 1000));
+                const minutes = Math.floor(remaining / 60);
+                const seconds = remaining % 60;
+                codeInfo.innerHTML = `📨 El código expira en ${minutes}:${seconds.toString().padStart(2,'0')}`;
+            }
+        }
+        
+        function resendCode() {
+            const now = new Date();
+            if (resendBlockedUntil && now < resendBlockedUntil) {
+                const minutesLeft = Math.ceil((resendBlockedUntil - now) / 60000);
+                mostrarError(`Debes esperar ${minutesLeft} minutos para solicitar otro código.`);
+                return;
+            }
+            
+            resendAttempts++;
+            let waitMinutes = 5;
+            if (resendAttempts === 2) waitMinutes = 15;
+            if (resendAttempts >= 3) {
+                resendBlockedUntil = new Date(now.getTime() + 4 * 3600000);
+                mostrarError('Has excedido los intentos. Espera 4 horas.');
+                return;
+            }
+            
+            generatedCode = generateCode();
+            codeExpiry = new Date(Date.now() + waitMinutes * 60000);
+            alert(`🔐 Nuevo código: ${generatedCode}\nVálido por ${waitMinutes} minutos.`);
+            updateTimerDisplay();
+        }
+        
+        document.getElementById('resendCodeBtn')?.addEventListener('click', resendCode);
+        
+        document.getElementById('verifyCodeBtn').addEventListener('click', () => {
+            const enteredCode = document.getElementById('verification-code').value.trim();
+            if (!enteredCode) {
+                mostrarError('Ingresa el código de verificación');
+                return;
+            }
+            if (new Date() > codeExpiry) {
+                mostrarError('El código ha expirado. Solicita uno nuevo.');
+                return;
+            }
+            if (enteredCode !== generatedCode) {
+                mostrarError('Código incorrecto');
+                return;
+            }
+            
+            step2.style.display = 'none';
+            step3.style.display = 'block';
+        });
+        
+        document.getElementById('resetPasswordBtn').addEventListener('click', () => {
+            const newPass = document.getElementById('new-password').value;
+            const confirmPass = document.getElementById('confirm-password').value;
+            
+            if (!newPass || newPass.length < 4) {
+                mostrarError('La contraseña debe tener al menos 4 caracteres');
+                return;
+            }
+            if (newPass !== confirmPass) {
+                mostrarError('Las contraseñas no coinciden');
+                return;
+            }
+            
+            const usuarios = getUsuarios();
+            const userIndex = usuarios.findIndex(u => u.email === userEmailForReset);
+            if (userIndex !== -1) {
+                usuarios[userIndex].password = newPass;
+                guardarUsuarios(usuarios);
+                alert('✅ Contraseña actualizada correctamente. Ahora puedes iniciar sesión.');
+                closeRecoveryModal();
+            }
+        });
+        
+        function closeRecoveryModal() {
+            modal.classList.remove('active');
+            step1.style.display = 'block';
+            step2.style.display = 'none';
+            step3.style.display = 'none';
+            generatedCode = null;
+            codeExpiry = null;
+            document.getElementById('verification-code').value = '';
+            document.getElementById('new-password').value = '';
+            document.getElementById('confirm-password').value = '';
+        }
+        
+        function mostrarError(mensaje) {
+            const errorDiv = document.getElementById('error-message');
+            errorDiv.textContent = mensaje;
+            errorDiv.style.display = 'block';
+            setTimeout(() => { errorDiv.style.display = 'none'; }, 3000);
+        }
+        
+        window.closeRecoveryModal = closeRecoveryModal;
+        window.togglePassword = togglePassword;
+        
+        // ==================== LOGIN CON EMAIL O TELÉFONO ====================
         document.getElementById('login-form').addEventListener('submit', (e) => {
             e.preventDefault();
-            const email = document.getElementById('email').value.trim();
+            const identifier = document.getElementById('loginIdentifier').value.trim();
             const password = document.getElementById('password').value;
             
-            const resultado = iniciarSesion(email, password);
+            const normalizado = normalizarIdentificador(identifier);
+            
+            if (!normalizado) {
+                mostrarError('Ingresa un correo válido o un teléfono de 8 dígitos');
+                return;
+            }
+            
+            let resultado;
+            if (normalizado.type === 'email') {
+                resultado = iniciarSesion(normalizado.value, password);
+            } else {
+                resultado = iniciarSesionPorTelefono(normalizado.value, password);
+            }
             
             if (resultado.exito) {
                 window.location.href = 'inicio.html';
             } else {
-                const errorDiv = document.getElementById('error-message');
-                errorDiv.textContent = resultado.mensaje;
-                errorDiv.style.display = 'block';
-                setTimeout(() => {
-                    errorDiv.style.display = 'none';
-                }, 3000);
+                mostrarError(resultado.mensaje);
             }
         });
+        
+        // Función auxiliar para iniciar sesión por teléfono
+        function iniciarSesionPorTelefono(telefono, password) {
+            const usuarios = getUsuarios();
+            const usuario = usuarios.find(u => u.telefono === telefono && u.password === password);
+            if (usuario) {
+                localStorage.setItem('usuarioActual', JSON.stringify(usuario));
+                return { exito: true, usuario };
+            }
+            return { exito: false, mensaje: "Teléfono o contraseña incorrectos" };
+        }
+        
+        // Verificar si ya hay sesión activa
+        if (getUsuarioActual()) {
+            window.location.href = 'inicio.html';
+        }
     </script>
 </body>
 </html>
