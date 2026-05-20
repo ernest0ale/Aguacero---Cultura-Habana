@@ -11,10 +11,165 @@
     <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+    <style>
+        /* ========== ESTILOS PARA EL PANEL DE FILTROS ========== */
+        .map-filters-bar {
+            position: absolute;
+            bottom: 1rem;
+            left: 1rem;
+            right: 1rem;
+            background: var(--color-surface);
+            border-radius: 20px;
+            padding: 1rem 1.2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+            background: rgba(var(--color-surface-rgb, 255, 255, 255), 0.95);
+            transition: all 0.3s ease;
+        }
+        
+        body.dark-mode .map-filters-bar {
+            background: rgba(30, 34, 39, 0.95);
+        }
+        
+        .filter-category-row {
+            margin-bottom: 1rem;
+        }
+        
+        .filter-category-label {
+            font-weight: 600;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: rgb(2, 90, 138);
+            margin-bottom: 0.75rem;
+            display: block;
+        }
+        
+        body.dark-mode .filter-category-label {
+            color: #5dade2;
+        }
+        
+        .map-categorias {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        
+        .map-category-chip {
+            padding: 0.4rem 1rem;
+            background: var(--color-bg);
+            border-radius: 40px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: var(--color-text-primary);
+            border: 1px solid var(--color-border);
+            white-space: nowrap;
+        }
+        
+        .map-category-chip:hover {
+            transform: translateY(-2px);
+            border-color: rgb(2, 90, 138);
+        }
+        
+        .map-category-chip.active {
+            background: rgb(2, 90, 138);
+            color: white;
+            border-color: rgb(2, 90, 138);
+        }
+        
+        .filter-divider {
+            height: 1px;
+            background: var(--color-border);
+            margin: 0.75rem 0;
+        }
+        
+        .filter-features-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .filter-features-label {
+            font-weight: 600;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: rgb(2, 90, 138);
+        }
+        
+        .filter-checkboxes {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .filter-checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            font-size: 0.8rem;
+            color: var(--color-text-primary);
+            padding: 0.3rem 0.8rem;
+            background: var(--color-bg);
+            border-radius: 40px;
+            transition: all 0.2s ease;
+            border: 1px solid var(--color-border);
+        }
+        
+        .filter-checkbox-item:hover {
+            border-color: rgb(2, 90, 138);
+        }
+        
+        .filter-checkbox-item input {
+            cursor: pointer;
+            width: 16px;
+            height: 16px;
+        }
+        
+        @media (max-width: 700px) {
+            .map-filters-bar {
+                padding: 0.8rem;
+                border-radius: 16px;
+            }
+            .map-category-chip {
+                padding: 0.3rem 0.7rem;
+                font-size: 0.7rem;
+            }
+            .filter-features-row {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .filter-checkboxes {
+                width: 100%;
+                justify-content: space-between;
+            }
+            .filter-checkbox-item {
+                flex: 1;
+                justify-content: center;
+            }
+        }
+        
+        @media (min-width: 1200px) {
+            .map-filters-bar {
+                left: calc(var(--sidebar-collapsed-width) + 1rem);
+                right: 1rem;
+            }
+            .sidebar.minimize ~ .main-content .map-filters-bar {
+                left: calc(var(--sidebar-collapsed-width) + 1rem);
+            }
+            .sidebar:not(.minimize) ~ .main-content .map-filters-bar {
+                left: calc(var(--sidebar-width) + 1rem);
+            }
+        }
+    </style>
 </head>
 <body>
 
-    <!-- Barra superior fija -->
     <div class="top-bar">
         <div class="top-bar-left">
             <button class="menu-toggle-btn" id="menuToggleBtn">
@@ -41,15 +196,21 @@
                 <img id="themeIconLight" src="resources/icons_light/moon.png" alt="tema">
                 <img id="themeIconDark" src="resources/icons_dark/sun.png" alt="tema" style="display:none;">
             </button>
-            <button class="icon-btn" id="notificationsBtn">
-                <img id="notifIconLight" src="resources/icons_light/bell.png" alt="notificaciones">
-                <img id="notifIconDark" src="resources/icons_dark/bell.png" alt="notificaciones" style="display:none;">
-            </button>
+            <div class="notifications-wrapper">
+                <button class="icon-btn" id="notificationsBtn">
+                    <img id="notifIconLight" src="resources/icons_light/bell.png" alt="notificaciones">
+                    <img id="notifIconDark" src="resources/icons_dark/bell.png" alt="notificaciones" style="display:none;">
+                    <span id="notifCounter" class="notif-counter" style="display: none;">0</span>
+                </button>
+                <div id="notificationsPanel" class="notifications-panel">
+                    <div class="notifications-header">📢 Notificaciones</div>
+                    <div class="notifications-list"></div>
+                </div>
+            </div>
             <div class="avatar" id="avatarUsuario">U</div>
         </div>
     </div>
 
-    <!-- Menú lateral -->
     <div class="sidebar" id="sidebar">
         <div class="menu_container">
             <ul class="menu">
@@ -60,11 +221,19 @@
                         <img class="dropdown-light" src="resources/icons_light/chevron-down.png"><img class="dropdown-dark" src="resources/icons_dark/chevron-down.png" style="display:none;">
                     </a>
                     <ul class="sub-menu" id="submenuCategorias">
-                        <li><a href="#" class="sub-menu-link">Conciertos</a></li><li><a href="#" class="sub-menu-link">Teatro</a></li><li><a href="#" class="sub-menu-link">Cine</a></li>
-                        <li><a href="#" class="sub-menu-link">Exposiciones</a></li><li><a href="#" class="sub-menu-link">Danza</a></li><li><a href="#" class="sub-menu-link">Libros</a></li>
-                        <li><a href="#" class="sub-menu-link">Festival</a></li><li><a href="#" class="sub-menu-link">Infantiles</a></li><li><a href="#" class="sub-menu-link">Deportes</a></li>
-                        <li><a href="#" class="sub-menu-link">Talleres</a></li><li><a href="#" class="sub-menu-link">Museos</a></li><li><a href="#" class="sub-menu-link">Ferias</a></li>
-                        <li><a href="#" class="sub-menu-link">Farándula</a></li>
+                        <li><a href="#" class="sub-menu-link" data-categoria="Conciertos">Conciertos</a></li>
+                        <li><a href="#" class="sub-menu-link" data-categoria="Teatro">Teatro</a></li>
+                        <li><a href="#" class="sub-menu-link" data-categoria="Cine">Cine</a></li>
+                        <li><a href="#" class="sub-menu-link" data-categoria="Exposiciones">Exposiciones</a></li>
+                        <li><a href="#" class="sub-menu-link" data-categoria="Danza">Danza</a></li>
+                        <li><a href="#" class="sub-menu-link" data-categoria="Libros">Libros</a></li>
+                        <li><a href="#" class="sub-menu-link" data-categoria="Festival">Festival</a></li>
+                        <li><a href="#" class="sub-menu-link" data-categoria="Infantiles">Infantiles</a></li>
+                        <li><a href="#" class="sub-menu-link" data-categoria="Deportes">Deportes</a></li>
+                        <li><a href="#" class="sub-menu-link" data-categoria="Talleres">Talleres</a></li>
+                        <li><a href="#" class="sub-menu-link" data-categoria="Museos">Museos</a></li>
+                        <li><a href="#" class="sub-menu-link" data-categoria="Ferias">Ferias</a></li>
+                        <li><a href="#" class="sub-menu-link" data-categoria="Farándula">Farándula</a></li>
                     </ul>
                 </li>
                 <li class="menu-item"><a href="calendario.html" class="menu-link"><img class="calendar-light" src="resources/icons_light/calendar-alt.png"><img class="calendar-dark" src="resources/icons_dark/calendar-alt.png" style="display:none;"><span>Calendario</span></a></li>
@@ -74,21 +243,113 @@
         </div>
     </div>
 
-    <!-- Contenido principal - Mapa -->
-    <div class="main-content" style="padding: 0;">
+    <div class="main-content" style="padding: 0; position: relative; overflow: visible;">
         <div class="mapa-container-full">
             <div id="mapa-principal" style="height: calc(100vh - var(--header-height)); width: 100%;"></div>
+            
             <div class="map-filters-bar" id="mapFiltersBar">
-                <span>Filtrar por:</span>
-                <div id="map-categorias" class="map-categorias"></div>
+                <div class="filter-category-row">
+                    <div class="filter-category-label">📂 CATEGORÍAS</div>
+                    <div id="map-categorias" class="map-categorias"></div>
+                </div>
+                
+                <div class="filter-divider"></div>
+                
+                <div class="filter-features-row">
+                    <div class="filter-features-label">⚙️ CARACTERÍSTICAS</div>
+                    <div class="filter-checkboxes">
+                        <label class="filter-checkbox-item">
+                            <input type="checkbox" id="map-filtro-apto-menores"> 👶 Apto para menores
+                        </label>
+                        <label class="filter-checkbox-item">
+                            <input type="checkbox" id="map-filtro-aire-libre"> 🌳 Al aire libre
+                        </label>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
+    <footer class="footer">
+        <div class="footer-container">
+            <!-- Columna 1: Logo y descripción -->
+            <div class="footer-column">
+                <div class="footer-logo">
+                    <img src="resources/aguacero_cuba_logo_trasnparente.png" alt="Cultura Habana">
+                    <span>Cultura Habana</span>
+                </div>
+                <p class="footer-description">
+                    Los mejores planes en La Habana se encuentran bajo este Aguacero.<br>
+                    Deja la sombrilla en casa, ¡no te pierdas ni una gota de cultura!
+                </p>
+            </div>
+
+            <!-- Columna 2: Enlaces rápidos -->
+            <div class="footer-column">
+                <h3>Explorar</h3>
+                <ul class="footer-links">
+                    <li><a href="inicio.html">Inicio</a></li>
+                    <li><a href="calendario.html">Calendario</a></li>
+                    <li><a href="mapa.html">Mapa</a></li>
+
+                </ul>
+            </div>
+
+            <!-- Columna 3: Soporte / Legal -->
+            <div class="footer-column">
+                <h3>Legal</h3>
+                <ul class="footer-links">
+                    <li><a href="#" id="faqLink">Preguntas frecuentes</a></li>
+                    <li><a href="#" id="termsLink">Términos y condiciones</a></li>
+                    <li><a href="#" id="privacyLink">Política de privacidad</a></li>
+                    <li><a href="mailto:contacto@culturahabana.com">contacto@culturahabana.com</a></li>
+                </ul>
+            </div>
+
+            <!-- Columna 4: Redes sociales -->
+            <div class="footer-column">
+                <h3>Síguenos</h3>
+                <div class="footer-social">
+                    <a href="https://www.facebook.com/aguacerocuba" class="social-icon" target="_blank">Facebook</a>
+                    <a href="https://www.instagram.com/aguacero_cuba/" class="social-icon" target="_blank">Instagram</a>
+                    <a href="https://www.whatsapp.com/channel/0029VbApHoQKmCPX3VynJs2n" class="social-icon" target="_blank">WhatsApp</a>
+                    <a href="https://t.me/Aguacero" class="social-icon" target="_blank">Telegram</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            <p>&copy; 2025 Cultura Habana. Todos los derechos reservados.</p>
+            <p>Diseñado con ❤️ para La Habana</p>
+        </div>
+    </footer>
+
     <script src="data.js"></script>
+    <script src="notifications.js"></script>
+    <script src="script.js"></script>
     <script>
         // ==================== Tema Oscuro ====================
         let isDarkMode = localStorage.getItem('darkMode') === 'true';
+        
+        // Función para obtener la URL del tile según el tema
+        function getTileUrl() {
+            if (isDarkMode) {
+                // CartoDB Dark Matter - perfecto para tema oscuro
+                return 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
+            } else {
+                // CartoDB Voyager - colores vivos para tema claro
+                return 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
+            }
+        }
+        
+        // Función para obtener la atribución según el tema
+        function getAttribution() {
+            if (isDarkMode) {
+                return '&copy; <a href="https://carto.com/">CartoDB</a> (Dark Matter) | &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>';
+            } else {
+                return '&copy; <a href="https://carto.com/">CartoDB</a> (Voyager) | &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>';
+            }
+        }
         
         function applyTheme() {
             const iconPairs = ['home', 'categories', 'dropdown', 'calendar', 'map', 'promo'];
@@ -128,26 +389,43 @@
                 if (notifDark) notifDark.style.display = 'none';
                 if (menuIcon) menuIcon.src = 'resources/icons_light/menu.png';
             }
+            
+            // Actualizar el mapa si existe
+            if (window.map && typeof window.map.eachLayer === 'function') {
+                window.map.eachLayer((layer) => {
+                    if (layer._url && (layer._url.includes('basemaps') || layer._url.includes('cartocdn'))) {
+                        window.map.removeLayer(layer);
+                    }
+                });
+                
+                const newTileLayer = L.tileLayer(getTileUrl(), {
+                    attribution: getAttribution(),
+                    minZoom: 10,
+                    maxZoom: 18,
+                    subdomains: 'abcd'
+                });
+                newTileLayer.addTo(window.map);
+            }
         }
         
         document.getElementById('themeToggleBtn')?.addEventListener('click', () => {
             isDarkMode = !isDarkMode;
             localStorage.setItem('darkMode', isDarkMode);
             applyTheme();
-            // Recargar mapa con nuevo estilo de tiles
-            if (map) {
-                map.eachLayer((layer) => {
-                    if (layer._url && layer._url.includes('basemaps')) {
-                        map.removeLayer(layer);
-                    }
-                });
-                const tileLayer = isDarkMode ? 
-                    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png') :
-                    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png');
-                tileLayer.addTo(map);
-            }
         });
         applyTheme();
+        
+        // ==================== Forzar menú minimizado en mapa ====================
+        function isMobile() {
+            return window.innerWidth <= 700;
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            const sidebar = document.getElementById('sidebar');
+            if (sidebar && !isMobile()) {
+                sidebar.classList.add('minimize');
+            }
+        });
         
         // ==================== Menú Lateral ====================
         const sidebar = document.getElementById('sidebar');
@@ -158,7 +436,7 @@
             localStorage.setItem('menuMinimized', isMenuMinimized);
             if (isMenuMinimized) sidebar.classList.add('minimize');
             else sidebar.classList.remove('minimize');
-            setTimeout(() => { if (map) map.invalidateSize(); }, 300);
+            setTimeout(() => { if (window.map) window.map.invalidateSize(); }, 300);
         });
         
         if (isMenuMinimized) sidebar.classList.add('minimize');
@@ -175,7 +453,7 @@
                 setTimeout(() => {
                     categoriasOpen = !categoriasOpen;
                     submenuCategorias.style.height = categoriasOpen ? `${submenuCategorias.scrollHeight + 10}px` : '0';
-                    if (map) map.invalidateSize();
+                    if (window.map) window.map.invalidateSize();
                 }, 300);
             } else {
                 categoriasOpen = !categoriasOpen;
@@ -218,31 +496,43 @@
         document.getElementById('searchBtn')?.addEventListener('click', realizarBusqueda);
         
         // ==================== Mapa ====================
-        let map;
         let markerClusterGroup;
         let categoriasActivas = [];
+        const filtroMapaMenores = document.getElementById('map-filtro-apto-menores');
+        const filtroMapaAireLibre = document.getElementById('map-filtro-aire-libre');
         
         function initMap() {
-            const tileUrl = isDarkMode ? 
-                'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png' :
-                'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
+            window.map = L.map('mapa-principal').setView([23.1136, -82.3666], 13);
             
-            map = L.map('mapa-principal').setView([23.1136, -82.3666], 12);
-            L.tileLayer(tileUrl, { attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>' }).addTo(map);
+            const tileLayer = L.tileLayer(getTileUrl(), {
+                attribution: getAttribution(),
+                minZoom: 10,
+                maxZoom: 18,
+                subdomains: 'abcd'
+            });
+            tileLayer.addTo(window.map);
             
             markerClusterGroup = L.markerClusterGroup();
-            map.addLayer(markerClusterGroup);
+            window.map.addLayer(markerClusterGroup);
             
             cargarMarcadores();
         }
         
         function cargarMarcadores() {
+            if (!markerClusterGroup) return;
             markerClusterGroup.clearLayers();
             
             let eventos = getEventosFuturos();
             
             if (categoriasActivas.length > 0) {
                 eventos = eventos.filter(e => categoriasActivas.includes(e.categoria));
+            }
+            
+            if (filtroMapaMenores && filtroMapaMenores.checked) {
+                eventos = eventos.filter(e => e.aptoMenores === true);
+            }
+            if (filtroMapaAireLibre && filtroMapaAireLibre.checked) {
+                eventos = eventos.filter(e => e.aireLibre === true);
             }
             
             eventos.forEach(evento => {
@@ -255,7 +545,9 @@
                             <h4 style="margin: 0 0 4px 0;">${evento.nombre}</h4>
                             <p style="margin: 0; font-size: 12px;"> ${formatFechaDDMMYYYY(evento.fechaInicio)}</p>
                             <p style="margin: 4px 0 0 0; font-size: 12px;"><strong>${evento.categoria}</strong></p>
-                            <button onclick="window.location.href='detallesEvento.html?id=${evento.id}'" style="margin-top: 8px; padding: 4px 12px; background: rgb(2,90,138); color: white; border: none; border-radius: 20px; cursor: pointer;">Ver detalles</button>
+                            ${evento.aptoMenores ? '<span style="display: inline-block; background: #27ae60; color: white; padding: 2px 6px; border-radius: 12px; font-size: 10px; margin-top: 4px;">👶 Menores</span>' : ''}
+                            ${evento.aireLibre ? '<span style="display: inline-block; background: #f39c12; color: white; padding: 2px 6px; border-radius: 12px; font-size: 10px; margin-top: 4px;">🌳 Aire libre</span>' : ''}
+                            <button onclick="window.location.href='detallesEvento.html?id=${evento.id}'" style="margin-top: 8px; padding: 4px 12px; background: rgb(2,90,138); color: white; border: none; border-radius: 20px; cursor: pointer; display: block; width: 100%;">Ver detalles</button>
                         </div>
                     `;
                     
@@ -290,7 +582,9 @@
             });
         }
         
-        // ==================== Inicializar ====================
+        filtroMapaMenores?.addEventListener('change', cargarMarcadores);
+        filtroMapaAireLibre?.addEventListener('change', cargarMarcadores);
+        
         setTimeout(() => {
             initMap();
             renderizarFiltrosMapa();
@@ -299,10 +593,10 @@
         updateAvatar();
         
         document.getElementById('notificationsBtn')?.addEventListener('click', () => {
-            alert(' Notificaciones: Próximamente podrás recibir alertas.');
+            alert('📢 Notificaciones: Próximamente podrás recibir alertas.');
         });
         
-        window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
+        window.addEventListener('resize', () => { if (window.map) window.map.invalidateSize(); });
     </script>
 </body>
 </html>

@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Perfil | Cultura Habana</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* Estilos específicos para la página de perfil */
+        .perfil-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .perfil-card {
+            background: var(--color-surface);
+            border-radius: 24px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 12px var(--shadow-border);
+        }
+        
+        .perfil-card h2 {
+            font-size: 1.3rem;
+            margin-bottom: 1.5rem;
+            color: var(--color-text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border-bottom: 2px solid var(--color-border);
+            padding-bottom: 0.5rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--color-text-primary);
+        }
+        
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            background: var(--color-bg);
+            color: var(--color-text-primary);
+            font-size: 1rem;
+        }
+        
+        .form-group input:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+        
+        /* Tema options */
+        .theme-options {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+        }
+        
+        .theme-option {
+            flex: 1;
+            padding: 0.8rem;
+            background: var(--color-bg);
+            border: 2px solid var(--color-border);
+            border-radius: 12px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .theme-option.active {
+            border-color: var(--color-primary, rgb(2, 90, 138));
+            background: var(--color-primary, rgb(2, 90, 138));
+            color: white;
+        }
+        
+        /* Color palette */
+        .color-palette {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+        
+        .color-option {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 3px solid transparent;
+        }
+        
+        .color-option:hover {
+            transform: scale(1.1);
+        }
+        
+        .color-option.selected {
+            border-color: var(--color-text-primary);
+            transform: scale(1.1);
+        }
+        
+        /* Categorías grid */
+        .categorias-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+            margin: 1rem 0;
+        }
+        
+        .cat-chip {
+            padding: 0.5rem 1rem;
+            background: var(--color-bg);
+            border: 1px solid var(--color-border);
+            border-radius: 40px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+        
+        .cat-chip.preferida {
+            background: var(--color-primary, rgb(2, 90, 138));
+            border-color: var(--color-primary, rgb(2, 90, 138));
+            color: white;
+        }
+        
+        .cat-chip:hover {
+            transform: translateY(-2px);
+        }
+        
+        .divider {
+            margin: 1.5rem 0;
+            height: 1px;
+            background: var(--color-border);
+        }
+        
+        .btn-primary {
+            padding: 0.8rem 1.5rem;
+            background: var(--color-primary, rgb(2, 90, 138));
+            color: white;
+            border: none;
+            border-radius: 30px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.05);
+        }
+        
+        .btn-danger {
+            background: #dc3545;
+        }
+        
+        .btn-danger:hover {
+            background: #c82333;
+        }
+        
+        .btn-secondary {
+            background: var(--color-border);
+            color: var(--color-text-primary);
+        }
+        
+        .message-success {
+            background: rgba(46, 204, 113, 0.1);
+            color: #27ae60;
+            padding: 0.8rem;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+        
+        .message-error {
+            background: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+            padding: 0.8rem;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+        
+        /* Modal de eliminación */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-card {
+            background: var(--color-surface);
+            border-radius: 24px;
+            padding: 2rem;
+            width: 90%;
+            max-width: 450px;
+        }
+        
+        .modal-card h3 {
+            margin-bottom: 1rem;
+            color: #dc3545;
+        }
+        
+        .warning-text {
+            background: rgba(220, 53, 69, 0.1);
+            padding: 1rem;
+            border-radius: 12px;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+        }
+        
+        .delete-input {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            background: var(--color-bg);
+            margin-top: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Barra superior fija -->
+    <div class="top-bar">
+        <div class="top-bar-left">
+            <button class="menu-toggle-btn" id="menuToggleBtn">
+                <img id="menuIcon" src="resources/icons_light/menu.png" alt="menú">
+            </button>
+            <div class="logo">
+                <img src="resources/aguacero_cuba_logo_trasnparente.png" alt="Logo">
+                <span>Cultura Habana</span>
+            </div>
+        </div>
+        
+        <div class="top-bar-center">
+            <div class="search-container">
+                <input type="text" id="buscador-global" placeholder="Buscar eventos...">
+                <button class="search-btn" id="searchBtn">
+                    <img id="searchIconLight" src="resources/icons_light/search.png" alt="buscar">
+                    <img id="searchIconDark" src="resources/icons_dark/search.png" alt="buscar" style="display:none;">
+                </button>
+            </div>
+        </div>
+        
+        <div class="top-bar-right">
+            <button class="icon-btn" id="themeToggleBtn">
+                <img id="themeIconLight" src="resources/icons_light/moon.png" alt="tema">
+                <img id="themeIconDark" src="resources/icons_dark/sun.png" alt="tema" style="display:none;">
+            </button>
+            <div class="notifications-wrapper">
+                <button class="icon-btn" id="notificationsBtn">
+                    <img id="notifIconLight" src="resources/icons_light/bell.png" alt="notificaciones">
+                    <img id="notifIconDark" src="resources/icons_dark/bell.png" alt="notificaciones" style="display:none;">
+                    <span id="notifCounter" class="notif-counter" style="display: none;">0</span>
+                </button>
+                <div id="notificationsPanel" class="notifications-panel">
+                    <div class="notifications-header">📢 Notificaciones</div>
+                    <div class="notifications-list"></div>
+                </div>
+            </div>
+            <div class="avatar" id="avatarUsuario">U</div>
+        </div>
+    </div>
+
+    <!-- Menú lateral -->
+    <div class="sidebar" id="sidebar">
+        <div class="menu_container">
+            <ul class="menu">
+                <li class="menu-item"><a href="inicio.html" class="menu-link"><img class="home-light" src="resources/icons_light/home-alt.png"><img class="home-dark" src="resources/icons_dark/home-alt.png" style="display:none;"><span>Inicio</span></a></li>
+                <li class="menu-item menu-item-dropdown" id="categoriasDropdown">
+                    <a href="#" class="menu-link" id="categoriasBtn">
+                        <img class="categories-light" src="resources/icons_light/price-tag-alt.png"><img class="categories-dark" src="resources/icons_dark/price-tag-alt.png" style="display:none;"><span>Categorías</span>
+                        <img class="dropdown-light" src="resources/icons_light/chevron-down.png"><img class="dropdown-dark" src="resources/icons_dark/chevron-down.png" style="display:none;">
+                    </a>
+                    <ul class="sub-menu" id="submenuCategorias">
+                        <li><a href="#" class="sub-menu-link" data-categoria="Conciertos">Conciertos</a></li>
+                        <li><a href="#" class="sub-menu-link" data-categoria="Teatro">Teatro</a></li>
+                        <li><a href="#" class="sub-menu-link" data-categoria="Cine">Cine</a></li>
+                        <li><a href="#" class="sub-menu-link" data-categoria="Exposiciones">Exposiciones</a></li>
+                        <li><a href="#" class="sub-menu-link" data-categoria="Danza">Danza</a></li>
+                        <li><a href="#" class="sub-menu-link" data-categoria="Libros">Libros</a></li>
+                        <li><a href="#" class="sub-menu-link" data-categoria="Festival">Festival</a></li>
+                        <li><a href="#" class="sub-menu-link" data-categoria="Infantiles">Infantiles</a></li>
+                        <li><a href="#" class="sub-menu-link" data-categoria="Deportes">Deportes</a></li>
+                        <li><a href="#" class="sub-menu-link" data-categoria="Talleres">Talleres</a></li>
+                        <li><a href="#" class="sub-menu-link" data-categoria="Museos">Museos</a></li>
+                        <li><a href="#" class="sub-menu-link" data-categoria="Ferias">Ferias</a></li>
+                        <li><a href="#" class="sub-menu-link" data-categoria="Farándula">Farándula</a></li>
+                    </ul>
+                </li>
+                <li class="menu-item"><a href="calendario.html" class="menu-link"><img class="calendar-light" src="resources/icons_light/calendar-alt.png"><img class="calendar-dark" src="resources/icons_dark/calendar-alt.png" style="display:none;"><span>Calendario</span></a></li>
+                <li class="menu-item"><a href="mapa.html" class="menu-link"><img class="map-light" src="resources/icons_light/map.png"><img class="map-dark" src="resources/icons_dark/map.png" style="display:none;"><span>Mapa</span></a></li>
+                <li class="menu-item" id="menuPromocion" style="display: none;"><a href="promocion.html" class="menu-link"><img class="promo-light" src="resources/icons_light/plus-circle.png"><img class="promo-dark" src="resources/icons_dark/plus-circle.png" style="display:none;"><span>Promocionar</span></a></li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Contenido principal -->
+    <div class="main-content">
+        <div class="perfil-container">
+            <div id="message"></div>
+            
+            <!-- Solo visible si NO hay sesión -->
+            <div id="noSessionWarning" class="perfil-card" style="text-align: center; display: none;">
+                <h2>Acceso restringido</h2>
+                <p>Debes iniciar sesión para acceder a esta página.</p>
+                <a href="login.html" class="btn-primary" style="display: inline-block; margin-top: 1rem;">Iniciar sesión</a>
+            </div>
+            
+            <!-- Visible SOLO con sesión -->
+            <div id="profileContent" style="display: none;">
+                <!-- Datos personales -->
+                <div class="perfil-card">
+                    <h2>👤 Datos personales</h2>
+                    <div class="form-group">
+                        <label>Nombre completo</label>
+                        <input type="text" id="nombre" placeholder="Tu nombre">
+                    </div>
+                    <div class="form-group">
+                        <label>Correo electrónico</label>
+                        <input type="email" id="email" disabled>
+                        <small style="color: var(--color-text-secondary);">El correo no puede cambiarse</small>
+                    </div>
+                    <div class="form-group">
+                        <label>Teléfono</label>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <span style="padding: 0.8rem; background: var(--color-bg); border: 1px solid var(--color-border); border-radius: 12px;">+53</span>
+                            <input type="tel" id="telefono" placeholder="5XXXXXXXX" maxlength="8" style="flex:1;">
+                        </div>
+                        <small style="color: var(--color-text-secondary);">8 dígitos (ejemplo: 51234567)</small>
+                    </div>
+                </div>
+                
+                <!-- Apariencia -->
+                <div class="perfil-card">
+                    <h2>Apariencia</h2>
+                    
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Tema</label>
+                    <div class="theme-options">
+                        <div class="theme-option" data-theme="light">Claro</div>
+                        <div class="theme-option" data-theme="dark">Oscuro</div>
+                        <div class="theme-option" data-theme="system">Seguir sistema</div>
+                    </div>
+                    
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; margin-top: 1rem;">Color principal</label>
+                    <div class="color-palette">
+                        <div class="color-option" style="background: #025a8a;" data-color="#025a8a"></div>
+                        <div class="color-option" style="background: #2ecc71;" data-color="#2ecc71"></div>
+                        <div class="color-option" style="background: #e67e22;" data-color="#e67e22"></div>
+                        <div class="color-option" style="background: #9b59b6;" data-color="#9b59b6"></div>
+                        <div class="color-option" style="background: #e74c3c;" data-color="#e74c3c"></div>
+                        <div class="color-option" style="background: #2c3e50;" data-color="#2c3e50"></div>
+                    </div>
+                </div>
+
+                <div class="perfil-card">
+                    <h2>Notificaciones</h2>
+                    
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Recibir alertas para mis eventos favoritos</label>
+                    <div class="theme-options" id="notifPreferences">
+                        <div class="theme-option notif-option" data-notif="sieteDias">📅 7 días antes</div>
+                        <div class="theme-option notif-option" data-notif="treintaMinutos">⏰ 30 minutos antes</div>
+                        <div class="theme-option notif-option" data-notif="unaHora">⏰ 1 hora antes</div>
+                    </div>
+                    <small style="color: var(--color-text-secondary);">Las notificaciones se activarán según tus preferencias</small>
+                </div>
+                
+                <!-- Preferencias de categorías -->
+                <div class="perfil-card">
+                    <h2>Mis categorías preferidas</h2>
+                    <div id="preferidas-container" class="categorias-grid"></div>
+                    
+                    <div class="divider"></div>
+                    
+                    <h2 style="font-size: 1rem; margin-bottom: 1rem;">📋 Otras categorías</h2>
+                    <div id="otras-container" class="categorias-grid"></div>
+                    <small style="color: var(--color-text-secondary);">💡 Haz clic en cualquier categoría para agregarla o quitarla de tus favoritas</small>
+                </div>
+                
+                <!-- Seguridad -->
+                <div class="perfil-card">
+                    <h2>Seguridad</h2>
+                    <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                        <button id="changePasswordBtn" class="btn-primary btn-secondary" style="background: var(--color-border);">🔑 Cambiar contraseña</button>
+                        <button id="deleteAccountBtn" class="btn-primary btn-danger">🗑️ Eliminar cuenta</button>
+                    </div>
+                </div>
+                
+                <!-- Botón guardar -->
+                <div style="text-align: center; margin-bottom: 2rem;">
+                    <button id="saveChangesBtn" class="btn-primary" style="padding: 0.8rem 2rem;">💾 Guardar cambios</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal cambio de contraseña -->
+    <div id="passwordModal" class="modal">
+        <div class="modal-card">
+            <h3>Cambiar contraseña</h3>
+            <div class="form-group">
+                <label>Contraseña actual</label>
+                <input type="password" id="current-password" placeholder="••••••••">
+            </div>
+            <div class="form-group">
+                <label>Nueva contraseña</label>
+                <input type="password" id="new-password" placeholder="••••••••">
+            </div>
+            <div class="form-group">
+                <label>Confirmar nueva contraseña</label>
+                <input type="password" id="confirm-new-password" placeholder="••••••••">
+            </div>
+            <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                <button id="confirmPasswordBtn" class="btn-primary">Actualizar</button>
+                <button id="cancelPasswordBtn" class="btn-primary btn-secondary" style="background: var(--color-border);">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal eliminar cuenta -->
+    <div id="deleteModal" class="modal">
+        <div class="modal-card">
+            <h3>Eliminar cuenta</h3>
+            <div class="warning-text">
+                <strong>📌 IMPORTANTE:</strong><br>
+                Tendrás <strong>14 días</strong> para recuperar tu cuenta. Pasado ese tiempo:
+                <ul style="margin-top: 0.5rem; margin-left: 1rem;">
+                    <li>Tus datos serán eliminados permanentemente</li>
+                    <li>No podrás volver a registrarte con el mismo correo</li>
+                </ul>
+            </div>
+            <div class="form-group">
+                <label>Escriba su correo electrónico</label>
+                <input type="email" id="delete-email" placeholder="tucorreo@ejemplo.com">
+            </div>
+            <div class="form-group">
+                <label>Escriba DELETE para eliminar</label>
+                <input type="text" id="delete-confirm" placeholder="DELETE" maxlength="6" style="text-transform: uppercase;">
+            </div>
+            <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                <button id="confirmDeleteBtn" class="btn-primary btn-danger">Eliminar cuenta</button>
+                <button id="cancelDeleteBtn" class="btn-primary btn-secondary" style="background: var(--color-border);">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="data.js"></script>
+    <script src="notifications.js"></script>
+    <script src="script.js"></script>
+    <script>
+        // ==================== VERIFICAR SESIÓN ====================
+        const usuarioActual = getUsuarioActual();
+        const noSessionWarning = document.getElementById('noSessionWarning');
+        const profileContent = document.getElementById('profileContent');
+        
+        if (!usuarioActual) {
+            noSessionWarning.style.display = 'block';
+            profileContent.style.display = 'none';
+        } else {
+            noSessionWarning.style.display = 'none';
+            profileContent.style.display = 'block';
+            
+            // Cargar datos del usuario
+            document.getElementById('nombre').value = usuarioActual.nombre || '';
+            document.getElementById('email').value = usuarioActual.email || '';
+            const telefono = (usuarioActual.telefono || '').replace('+53 ', '');
+            document.getElementById('telefono').value = telefono;
+            
+            // Cargar preferencias actuales
+            const preferenciasActuales = usuarioActual.preferencias || [];
+            
+            // Todas las categorías disponibles
+            const todasCategorias = [
+                { nombre: "Conciertos", emoji: "🎵" },
+                { nombre: "Teatro", emoji: "🎭" },
+                { nombre: "Cine", emoji: "🎬" },
+                { nombre: "Exposiciones", emoji: "🖼️" },
+                { nombre: "Danza", emoji: "💃" },
+                { nombre: "Libros", emoji: "📚" },
+                { nombre: "Festival", emoji: "🎉" },
+                { nombre: "Infantiles", emoji: "🧸" },
+                { nombre: "Deportes", emoji: "⚽" },
+                { nombre: "Talleres", emoji: "🔧" },
+                { nombre: "Museos", emoji: "🏛️" },
+                { nombre: "Ferias", emoji: "🛍️" },
+                { nombre: "Farándula", emoji: "✨" }
+            ];
+            
+            function renderizarCategorias() {
+                const preferidas = preferenciasActuales;
+                const otras = todasCategorias.filter(cat => !preferidas.includes(cat.nombre));
+                
+                const preferidasContainer = document.getElementById('preferidas-container');
+                const otrasContainer = document.getElementById('otras-container');
+                
+                preferidasContainer.innerHTML = preferidas.map(cat => `
+                    <div class="cat-chip preferida" data-categoria="${cat}">
+                        ${todasCategorias.find(c => c.nombre === cat)?.emoji || '📌'} ${cat}
+                    </div>
+                `).join('');
+                
+                otrasContainer.innerHTML = otras.map(cat => `
+                    <div class="cat-chip" data-categoria="${cat.nombre}">
+                        ${cat.emoji} ${cat.nombre}
+                    </div>
+                `).join('');
+                
+                // Agregar event listeners
+                document.querySelectorAll('.cat-chip').forEach(chip => {
+                    chip.addEventListener('click', () => {
+                        const cat = chip.getAttribute('data-categoria');
+                        if (preferenciasActuales.includes(cat)) {
+                            // Quitar de preferidas
+                            const index = preferenciasActuales.indexOf(cat);
+                            if (index !== -1) preferenciasActuales.splice(index, 1);
+                        } else {
+                            // Agregar a preferidas
+                            preferenciasActuales.push(cat);
+                        }
+                        renderizarCategorias();
+                    });
+                });
+            }
+            
+            renderizarCategorias();
+
+            // Cargar preferencias de notificación
+            const notifPrefs = usuarioActual.preferenciasNotificacion || {
+                sieteDias: true,
+                treintaMinutos: true,
+                unaHora: false
+            };
+
+            const notifOptions = document.querySelectorAll('.notif-option');
+            notifOptions.forEach(option => {
+                const tipo = option.getAttribute('data-notif');
+                if (notifPrefs[tipo]) {
+                    option.classList.add('active');
+                }
+                option.addEventListener('click', () => {
+                    option.classList.toggle('active');
+                });
+            });
+
+            // Al guardar cambios, incluir preferencias de notificación
+            // En el objeto usuarioActualizado agregar:
+            preferenciasNotificacion: {
+                sieteDias: document.querySelector('.notif-option[data-notif="sieteDias"]')?.classList.contains('active') || false,
+                treintaMinutos: document.querySelector('.notif-option[data-notif="treintaMinutos"]')?.classList.contains('active') || false,
+                unaHora: document.querySelector('.notif-option[data-notif="unaHora"]')?.classList.contains('active') || false
+            }
+            
+            // ==================== TEMA ====================
+            const themePreference = localStorage.getItem('themePreference') || 'system';
+            const themeOptions = document.querySelectorAll('.theme-option');
+            
+            themeOptions.forEach(option => {
+                const theme = option.getAttribute('data-theme');
+                if (theme === themePreference) {
+                    option.classList.add('active');
+                }
+                option.addEventListener('click', () => {
+                    themeOptions.forEach(opt => opt.classList.remove('active'));
+                    option.classList.add('active');
+                    const selectedTheme = option.getAttribute('data-theme');
+                    localStorage.setItem('themePreference', selectedTheme);
+                    aplicarTemaSegunPreferencia();
+                });
+            });
+            
+            function aplicarTemaSegunPreferencia() {
+                const pref = localStorage.getItem('themePreference') || 'system';
+                let darkMode = false;
+                
+                if (pref === 'dark') {
+                    darkMode = true;
+                } else if (pref === 'light') {
+                    darkMode = false;
+                } else {
+                    darkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                }
+                
+                if (darkMode) {
+                    document.body.classList.add('dark-mode');
+                } else {
+                    document.body.classList.remove('dark-mode');
+                }
+                
+                isDarkMode = darkMode;
+                localStorage.setItem('darkMode', darkMode);
+                
+                // Actualizar icono del botón de tema en la barra superior
+                const themeIconLight = document.getElementById('themeIconLight');
+                const themeIconDark = document.getElementById('themeIconDark');
+                if (themeIconLight && themeIconDark) {
+                    if (darkMode) {
+                        themeIconLight.style.display = 'none';
+                        themeIconDark.style.display = 'inline-block';
+                    } else {
+                        themeIconLight.style.display = 'inline-block';
+                        themeIconDark.style.display = 'none';
+                    }
+                }
+            }
+            
+            // ==================== COLOR PRIMARIO ====================
+            const colorPreference = localStorage.getItem('colorPrimary') || '#025a8a';
+            const colorOptions = document.querySelectorAll('.color-option');
+            
+            function aplicarColorPrimario(color) {
+                document.documentElement.style.setProperty('--color-primary', color);
+                document.documentElement.style.setProperty('--color-primary-hover', color + 'cc');
+                localStorage.setItem('colorPrimary', color);
+            }
+            
+            colorOptions.forEach(option => {
+                const color = option.getAttribute('data-color');
+                if (color === colorPreference) {
+                    option.classList.add('selected');
+                    aplicarColorPrimario(color);
+                }
+                option.addEventListener('click', () => {
+                    colorOptions.forEach(opt => opt.classList.remove('selected'));
+                    option.classList.add('selected');
+                    aplicarColorPrimario(color);
+                });
+            });
+            
+            // ==================== GUARDAR CAMBIOS ====================
+            document.getElementById('saveChangesBtn').addEventListener('click', () => {
+                const nombre = document.getElementById('nombre').value.trim();
+                const telefono = document.getElementById('telefono').value.trim();
+                
+                if (!nombre) {
+                    mostrarMensaje('El nombre es obligatorio', 'error');
+                    return;
+                }
+                
+                let telefonoCompleto = '';
+                if (telefono) {
+                    if (!/^\d{8}$/.test(telefono)) {
+                        mostrarMensaje('El teléfono debe tener 8 dígitos', 'error');
+                        return;
+                    }
+                    telefonoCompleto = '+53 ' + telefono;
+                }
+                
+                const usuarioActualizado = {
+                    ...usuarioActual,
+                    nombre: nombre,
+                    telefono: telefonoCompleto,
+                    preferencias: preferenciasActuales,
+                    preferenciasNotificacion: {
+                        sieteDias: document.querySelector('.notif-option[data-notif="sieteDias"]')?.classList.contains('active') || false,
+                        treintaMinutos: document.querySelector('.notif-option[data-notif="treintaMinutos"]')?.classList.contains('active') || false,
+                        unaHora: document.querySelector('.notif-option[data-notif="unaHora"]')?.classList.contains('active') || false
+                    }
+                };
+                
+                if (actualizarUsuario(usuarioActualizado)) {
+                    mostrarMensaje('✅ Cambios guardados correctamente', 'success');
+                    setTimeout(() => window.location.reload(), 1500);
+                } else {
+                    mostrarMensaje('Error al guardar los cambios', 'error');
+                }
+            });
+            
+            // ==================== CAMBIAR CONTRASEÑA ====================
+            const passwordModal = document.getElementById('passwordModal');
+            
+            document.getElementById('changePasswordBtn').addEventListener('click', () => {
+                passwordModal.classList.add('active');
+            });
+            
+            document.getElementById('confirmPasswordBtn').addEventListener('click', () => {
+                const currentPass = document.getElementById('current-password').value;
+                const newPass = document.getElementById('new-password').value;
+                const confirmPass = document.getElementById('confirm-new-password').value;
+                
+                if (currentPass !== usuarioActual.password) {
+                    mostrarMensaje('Contraseña actual incorrecta', 'error');
+                    return;
+                }
+                
+                if (newPass.length < 4) {
+                    mostrarMensaje('La nueva contraseña debe tener al menos 4 caracteres', 'error');
+                    return;
+                }
+                
+                if (newPass !== confirmPass) {
+                    mostrarMensaje('Las contraseñas no coinciden', 'error');
+                    return;
+                }
+                
+                const usuarios = getUsuarios();
+                const index = usuarios.findIndex(u => u.id === usuarioActual.id);
+                if (index !== -1) {
+                    usuarios[index].password = newPass;
+                    guardarUsuarios(usuarios);
+                    localStorage.setItem('usuarioActual', JSON.stringify(usuarios[index]));
+                    mostrarMensaje('✅ Contraseña actualizada correctamente', 'success');
+                    passwordModal.classList.remove('active');
+                    document.getElementById('current-password').value = '';
+                    document.getElementById('new-password').value = '';
+                    document.getElementById('confirm-new-password').value = '';
+                }
+            });
+            
+            document.getElementById('cancelPasswordBtn').addEventListener('click', () => {
+                passwordModal.classList.remove('active');
+            });
+            
+            // ==================== ELIMINAR CUENTA ====================
+            const deleteModal = document.getElementById('deleteModal');
+            
+            document.getElementById('deleteAccountBtn').addEventListener('click', () => {
+                deleteModal.classList.add('active');
+                document.getElementById('delete-email').value = usuarioActual.email;
+                document.getElementById('delete-confirm').value = '';
+            });
+            
+            document.getElementById('confirmDeleteBtn').addEventListener('click', () => {
+                const email = document.getElementById('delete-email').value.trim();
+                const confirmText = document.getElementById('delete-confirm').value.trim();
+                
+                if (email !== usuarioActual.email) {
+                    mostrarMensaje('El correo no coincide', 'error');
+                    return;
+                }
+                
+                const resultado = desactivarCuenta(email, confirmText);
+                
+                if (resultado.exito) {
+                    mostrarMensaje(resultado.mensaje, 'success');
+                    setTimeout(() => {
+                        window.location.href = 'inicio.html';
+                    }, 2000);
+                } else {
+                    mostrarMensaje(resultado.mensaje, 'error');
+                }
+                
+                deleteModal.classList.remove('active');
+            });
+            
+            document.getElementById('cancelDeleteBtn').addEventListener('click', () => {
+                deleteModal.classList.remove('active');
+            });
+        }
+        
+        function mostrarMensaje(mensaje, tipo) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.className = tipo === 'error' ? 'message-error' : 'message-success';
+            messageDiv.textContent = mensaje;
+            messageDiv.style.display = 'block';
+            setTimeout(() => {
+                messageDiv.style.display = 'none';
+            }, 3000);
+        }
+        
+        // Inicializar tema desde preferencia guardada
+        aplicarTemaSegunPreferencia();
+        
+        // Escuchar cambios de tema del sistema
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+            const pref = localStorage.getItem('themePreference') || 'system';
+            if (pref === 'system') {
+                aplicarTemaSegunPreferencia();
+            }
+        });
+    </script>
+</body>
+</html>

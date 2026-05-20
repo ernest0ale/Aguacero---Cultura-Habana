@@ -1,4 +1,29 @@
-// data.js - Base de datos local con localStorage
+// data.js - Base de datos local con localStorage y sistema de eliminación
+
+const ADMIN_EMAILS = [
+    "organizador@culturahabana.com",  // Email del administrador principal
+    "admin0428@knowwhere.com",        // Tu email personal
+    "adcuenta@redessociales.com",   // Email de la cuenta de redes
+    "admincreador@culturahabana.cu"
+];
+
+function esAdministrador(usuario) {
+    if (!usuario) return false;
+    return ADMIN_EMAILS.includes(usuario.email);
+}
+
+// Solo para crear/editar eventos
+function puedeCrearEvento(usuario) {
+    return esAdministrador(usuario);
+}
+
+function puedeEditarEvento(usuario, evento) {
+    return esAdministrador(usuario);
+}
+
+function puedeEliminarEvento(usuario, evento) {
+    return esAdministrador(usuario);
+}
 
 const eventosEjemplo = [
     {
@@ -153,10 +178,82 @@ function inicializarDatos() {
     }
     if (!localStorage.getItem('usuarios')) {
         const usuariosIniciales = [
-            { id: "user_001", email: "organizador@culturahabana.com", password: "123456", nombre: "Carlos Pérez", rol: "organizador", telefono: "+53 51234567", avatarColor: "#2ecc71" },
-            { id: "user_002", email: "usuario@example.com", password: "123456", nombre: "Laura Gómez", rol: "usuario", telefono: "+53 59876543", avatarColor: "#3498db" }
+            { 
+                id: "user_001", 
+                email: "ocarlos@example.com", 
+                password: "123456", 
+                nombre: "Carlos Pérez", 
+                rol: "usuario", 
+                telefono: "+53 51234567", 
+                avatarColor: "#2ecc71",
+                preferencias: ["Conciertos", "Teatro", "Cine"],
+                estado: "activo",
+                fechaDesactivacion: null,
+                fechaEliminacion: null
+            },
+            { 
+                id: "user_002", 
+                email: "usuario@example.com", 
+                password: "123456", 
+                nombre: "Laura Gómez", 
+                rol: "usuario", 
+                telefono: "+53 59876543", 
+                avatarColor: "#3498db",
+                preferencias: ["Danza", "Exposiciones", "Libros"],
+                estado: "activo",
+                fechaDesactivacion: null,
+                fechaEliminacion: null
+            },
+            { 
+                id: "user_003", 
+                email: "organizador@culturahabana.com", 
+                password: "12345678", 
+                nombre: "Aguacero Admin", 
+                rol: "usuario", 
+                telefono: "+53 51234567", 
+                avatarColor: "#3498db",
+                preferencias: ["Danza", "Exposiciones", "Libros"],
+                estado: "activo",
+                fechaDesactivacion: null,
+                fechaEliminacion: null
+            },
+            { 
+                id: "user_004", 
+                email: "admincreador@culturahabana.cu", 
+                password: "admin1128", 
+                nombre: "Admin Creador", 
+                rol: "usuario", 
+                telefono: "+53 51765432", 
+                avatarColor: "#3498db",
+                preferencias: [],
+                estado: "activo",
+                fechaDesactivacion: null,
+                fechaEliminacion: null
+            }
         ];
         localStorage.setItem('usuarios', JSON.stringify(usuariosIniciales));
+    }
+        // Crear usuario administrador si no existe
+    const usuarios = getUsuarios();
+    const adminExists = usuarios.some(u => ADMIN_EMAILS.includes(u.email));
+    
+    if (!adminExists && ADMIN_EMAILS.length > 0) {
+        const adminUser = {
+            id: "user_admin_" + Date.now(),
+            email: ADMIN_EMAILS[0],
+            password: "Admin123!",  // Contraseña temporal (cambiarla en el primer inicio)
+            nombre: "Administrador",
+            telefono: "51234567",
+            rol: "usuario",
+            avatarColor: "#e74c3c",
+            preferencias: [],
+            estado: "activo",
+            fechaDesactivacion: null,
+            fechaEliminacion: null
+        };
+        usuarios.push(adminUser);
+        guardarUsuarios(usuarios);
+        console.log("✅ Usuario administrador creado con email:", ADMIN_EMAILS[0]);
     }
 }
 
@@ -182,7 +279,24 @@ function agregarEvento(evento) {
 }
 
 function getUsuarios() { 
-    return JSON.parse(localStorage.getItem('usuarios')) || []; 
+    const usuarios = JSON.parse(localStorage.getItem('usuarios')) || [];
+    // Limpiar usuarios eliminados que pasaron los 14 días
+    const ahora = new Date();
+    let cambios = false;
+    const usuariosFiltrados = usuarios.filter(usuario => {
+        if (usuario.estado === 'eliminado' && usuario.fechaEliminacion) {
+            const fechaElim = new Date(usuario.fechaEliminacion);
+            if (ahora > fechaElim) {
+                cambios = true;
+                return false;
+            }
+        }
+        return true;
+    });
+    if (cambios) {
+        guardarUsuarios(usuariosFiltrados);
+    }
+    return usuariosFiltrados;
 }
 
 function guardarUsuarios(usuarios) {
@@ -198,7 +312,12 @@ function registrarUsuario(usuario) {
     const nuevoUsuario = { 
         ...usuario, 
         id: "user_" + Date.now(), 
-        avatarColor: colores[Math.floor(Math.random() * colores.length)] 
+        avatarColor: colores[Math.floor(Math.random() * colores.length)],
+        preferencias: usuario.preferencias || [],
+        rol: "usuario",  // ← Forzar siempre usuario
+        estado: "activo",
+        fechaDesactivacion: null,
+        fechaEliminacion: null
     };
     usuarios.push(nuevoUsuario);
     guardarUsuarios(usuarios);
@@ -208,11 +327,29 @@ function registrarUsuario(usuario) {
 function iniciarSesion(email, password) {
     const usuarios = getUsuarios();
     const usuario = usuarios.find(u => u.email === email && u.password === password);
-    if (usuario) {
-        localStorage.setItem('usuarioActual', JSON.stringify(usuario));
-        return { exito: true, usuario };
+    
+    if (!usuario) {
+        return { exito: false, mensaje: "Correo o contraseña incorrectos" };
     }
-    return { exito: false, mensaje: "Correo o contraseña incorrectos" };
+    
+    // Verificar si la cuenta está deshabilitada
+    if (usuario.estado === 'deshabilitado') {
+        const fechaDesac = new Date(usuario.fechaDesactivacion);
+        const ahora = new Date();
+        const diasRestantes = Math.ceil((fechaDesac.getTime() + 14 * 24 * 60 * 60 * 1000 - ahora.getTime()) / (1000 * 60 * 60 * 24));
+        
+        if (diasRestantes > 0) {
+            return { 
+                exito: false, 
+                mensaje: `Tu cuenta está desactivada. Tienes ${diasRestantes} días para recuperarla.`,
+                necesitaRecuperacion: true,
+                email: usuario.email
+            };
+        }
+    }
+    
+    localStorage.setItem('usuarioActual', JSON.stringify(usuario));
+    return { exito: true, usuario };
 }
 
 function cerrarSesion() { 
@@ -229,6 +366,90 @@ function esOrganizador() {
     return u && u.rol === 'organizador'; 
 }
 
+function actualizarUsuario(usuarioActualizado) {
+    const usuarios = getUsuarios();
+    const index = usuarios.findIndex(u => u.id === usuarioActualizado.id);
+    if (index !== -1) {
+        usuarios[index] = usuarioActualizado;
+        guardarUsuarios(usuarios);
+        // Actualizar sesión actual si es el mismo usuario
+        const usuarioActual = getUsuarioActual();
+        if (usuarioActual && usuarioActual.id === usuarioActualizado.id) {
+            localStorage.setItem('usuarioActual', JSON.stringify(usuarioActualizado));
+        }
+        return true;
+    }
+    return false;
+}
+
+function desactivarCuenta(email, confirmText) {
+    if (confirmText !== 'DELETE') {
+        return { exito: false, mensaje: 'Debes escribir DELETE para confirmar' };
+    }
+    
+    const usuarios = getUsuarios();
+    const index = usuarios.findIndex(u => u.email === email);
+    if (index === -1) {
+        return { exito: false, mensaje: 'Usuario no encontrado' };
+    }
+    
+    const ahora = new Date();
+    const fechaEliminacion = new Date(ahora.getTime() + 14 * 24 * 60 * 60 * 1000);
+    
+    usuarios[index].estado = 'deshabilitado';
+    usuarios[index].fechaDesactivacion = ahora.toISOString();
+    usuarios[index].fechaEliminacion = fechaEliminacion.toISOString();
+    
+    guardarUsuarios(usuarios);
+    
+    // Cerrar sesión si era el usuario actual
+    const usuarioActual = getUsuarioActual();
+    if (usuarioActual && usuarioActual.email === email) {
+        cerrarSesion();
+    }
+    
+    return { exito: true, mensaje: `Cuenta desactivada. Tendrás 14 días para recuperarla (hasta ${fechaEliminacion.toLocaleDateString()})` };
+}
+
+function recuperarCuenta(email, codigo, nuevoPassword) {
+    const usuarios = getUsuarios();
+    const index = usuarios.findIndex(u => u.email === email);
+    if (index === -1) {
+        return { exito: false, mensaje: 'Usuario no encontrado' };
+    }
+    
+    if (usuarios[index].estado !== 'deshabilitado') {
+        return { exito: false, mensaje: 'Esta cuenta no está en período de recuperación' };
+    }
+    
+    const fechaDesac = new Date(usuarios[index].fechaDesactivacion);
+    const ahora = new Date();
+    const diasTranscurridos = (ahora - fechaDesac) / (1000 * 60 * 60 * 24);
+    
+    if (diasTranscurridos > 14) {
+        return { exito: false, mensaje: 'El período de recuperación ha expirado. La cuenta será eliminada permanentemente.' };
+    }
+    
+    // Verificar código (simulado)
+    if (codigo !== '12345678') {
+        return { exito: false, mensaje: 'Código incorrecto' };
+    }
+    
+    usuarios[index].estado = 'activo';
+    usuarios[index].fechaDesactivacion = null;
+    usuarios[index].fechaEliminacion = null;
+    if (nuevoPassword) {
+        usuarios[index].password = nuevoPassword;
+    }
+    
+    guardarUsuarios(usuarios);
+    
+    // Iniciar sesión automáticamente
+    iniciarSesion(email, nuevoPassword || usuarios[index].password);
+    
+    return { exito: true, mensaje: 'Cuenta recuperada exitosamente' };
+}
+
 function getEventosFuturos() {
     const hoy = new Date();
     hoy.setHours(0, 0, 0, 0);
@@ -241,39 +462,6 @@ function getCategoriasConEventos() {
     return Array.from(categorias).sort();
 }
 
-function getEventosPorFecha(fechaStr) {
-    if (!fechaStr) return [];
-    const eventos = getEventos();
-    
-    // Convertir fechaStr de formato "dd/mm/aaaa" a objeto Date
-    const partes = fechaStr.split('/');
-    if (partes.length !== 3) return [];
-    
-    // partes[0] = día, partes[1] = mes, partes[2] = año
-    const dia = parseInt(partes[0]);
-    const mes = parseInt(partes[1]) - 1; // Los meses en JS van de 0 a 11
-    const anio = parseInt(partes[2]);
-    
-    const fechaBuscar = new Date(anio, mes, dia);
-    fechaBuscar.setHours(0, 0, 0, 0);
-    
-    console.log("🔍 Buscando eventos para fecha:", fechaBuscar.toLocaleDateString('es-ES'));
-    
-    const resultados = eventos.filter(evento => {
-        const fechaEvento = new Date(evento.fechaInicio);
-        fechaEvento.setHours(0, 0, 0, 0);
-        
-        const coincide = fechaEvento.getTime() === fechaBuscar.getTime();
-        if (coincide) {
-            console.log("✅ Coincide:", evento.nombre, evento.fechaInicio);
-        }
-        return coincide;
-    });
-    
-    console.log(`📊 Encontrados ${resultados.length} eventos`);
-    return resultados.sort((a, b) => new Date(a.fechaInicio) - new Date(b.fechaInicio));
-}
-
 function buscarEventos(termino) {
     if (!termino || termino.trim() === "") return getEventos();
     const t = termino.toLowerCase();
@@ -283,6 +471,52 @@ function buscarEventos(termino) {
         (e.ubicacion && e.ubicacion.toLowerCase().includes(t))
     );
 }
+
+// ==================== ELIMINACIÓN AUTOMÁTICA DE EVENTOS ====================
+function limpiarEventosExpirados() {
+    const eventos = getEventos();
+    const ahora = new Date();
+    let eventosModificados = false;
+    
+    const eventosFiltrados = eventos.filter(evento => {
+        let fechaExpiracion;
+        
+        if (evento.fechaFin && evento.fechaFin !== evento.fechaInicio) {
+            fechaExpiracion = new Date(evento.fechaFin);
+            if (evento.horaFin) {
+                const [horas, minutos] = evento.horaFin.split(':');
+                fechaExpiracion.setHours(parseInt(horas) + 8, parseInt(minutos));
+            } else {
+                fechaExpiracion.setHours(23, 59, 59);
+            }
+        } else {
+            fechaExpiracion = new Date(evento.fechaInicio);
+            if (evento.horaFin) {
+                const [horas, minutos] = evento.horaFin.split(':');
+                fechaExpiracion.setHours(parseInt(horas) + 8, parseInt(minutos));
+            } else if (evento.horaInicio) {
+                const [horas, minutos] = evento.horaInicio.split(':');
+                fechaExpiracion.setHours(parseInt(horas) + 12, parseInt(minutos));
+            } else {
+                fechaExpiracion.setHours(23, 59, 59);
+            }
+        }
+        
+        if (ahora > fechaExpiracion) {
+            eventosModificados = true;
+            return false;
+        }
+        return true;
+    });
+    
+    if (eventosModificados) {
+        guardarEventos(eventosFiltrados);
+    }
+}
+
+// Ejecutar al cargar la página y cada hora
+limpiarEventosExpirados();
+setInterval(limpiarEventosExpirados, 60 * 60 * 1000);
 
 function formatFechaShort(fechaStr) {
     const fecha = new Date(fechaStr);
@@ -307,3 +541,20 @@ function getIcono(categoria) {
 }
 
 inicializarDatos();
+
+// ==================== FUNCIONES PARA OBTENER ETIQUETAS DE CARACTERÍSTICAS ====================
+function getEtiquetaAptoMenores(aptoMenores) {
+    if (aptoMenores === true) {
+        return { texto: '👶 Apto para menores', clase: 'badge-menores-si' };
+    } else {
+        return { texto: '🔞 Solo adultos', clase: 'badge-menores-no' };
+    }
+}
+
+function getEtiquetaAireLibre(aireLibre) {
+    if (aireLibre === true) {
+        return { texto: '🌳 Al aire libre', clase: 'badge-aire-si' };
+    } else {
+        return { texto: '🏠 Bajo techo', clase: 'badge-aire-no' };
+    }
+}

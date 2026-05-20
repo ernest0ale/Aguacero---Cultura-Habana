@@ -41,7 +41,38 @@
         
         .nav-buttons {
             display: flex;
+            align-items: center;
             gap: 1rem;
+        }
+        
+        /* Botón de tema oscuro */
+        .theme-toggle-landing {
+            background: none;
+            border: 2px solid rgb(2, 90, 138);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            background: var(--color-surface);
+        }
+        
+        .theme-toggle-landing:hover {
+            transform: scale(1.05);
+            background: rgb(2, 90, 138);
+        }
+        
+        .theme-toggle-landing:hover .theme-icon {
+            filter: brightness(0) invert(1);
+        }
+        
+        .theme-icon {
+            width: 20px;
+            height: 20px;
+            transition: all 0.3s ease;
         }
         
         .btn-outline {
@@ -180,6 +211,9 @@
                 <h1>Cultura Habana</h1>
             </div>
             <div class="nav-buttons">
+                <button class="theme-toggle-landing" id="themeToggleLanding">
+                    <img id="landingThemeIcon" class="theme-icon" src="resources/icons_light/moon.png" alt="tema">
+                </button>
                 <a href="login.html" class="btn-outline">Iniciar sesión</a>
                 <a href="registro.html" class="btn-primary-landing">Registrarse</a>
             </div>
@@ -200,8 +234,91 @@
         </div>
     </div>
 
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="footer-container">
+            <!-- Columna 1: Logo y descripción -->
+            <div class="footer-column">
+                <div class="footer-logo">
+                    <img src="resources/aguacero_cuba_logo_trasnparente.png" alt="Cultura Habana">
+                    <span>Cultura Habana</span>
+                </div>
+                <p class="footer-description">
+                    Los mejores planes en La Habana se encuentran bajo este Aguacero.<br>
+                    Deja la sombrilla en casa, ¡no te pierdas ni una gota de cultura!
+                </p>
+            </div>
+
+            <!-- Columna 2: Enlaces rápidos -->
+            <div class="footer-column">
+                <h3>Explorar</h3>
+                <ul class="footer-links">
+                    <li><a href="inicio.html">Inicio</a></li>
+                    <li><a href="calendario.html">Calendario</a></li>
+                    <li><a href="mapa.html">Mapa</a></li>
+
+                </ul>
+            </div>
+
+            <!-- Columna 3: Soporte / Legal -->
+            <div class="footer-column">
+                <h3>Legal</h3>
+                <ul class="footer-links">
+                    <li><a href="#" id="faqLink">Preguntas frecuentes</a></li>
+                    <li><a href="#" id="termsLink">Términos y condiciones</a></li>
+                    <li><a href="#" id="privacyLink">Política de privacidad</a></li>
+                    <li><a href="mailto:contacto@culturahabana.com">contacto@culturahabana.com</a></li>
+                </ul>
+            </div>
+
+            <!-- Columna 4: Redes sociales -->
+            <div class="footer-column">
+                <h3>Síguenos</h3>
+                <div class="footer-social">
+                    <a href="https://www.facebook.com/aguacerocuba" class="social-icon" target="_blank">Facebook</a>
+                    <a href="https://www.instagram.com/aguacero_cuba/" class="social-icon" target="_blank">Instagram</a>
+                    <a href="https://www.whatsapp.com/channel/0029VbApHoQKmCPX3VynJs2n" class="social-icon" target="_blank">WhatsApp</a>
+                    <a href="https://t.me/Aguacero" class="social-icon" target="_blank">Telegram</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            <p>&copy; 2025 Cultura Habana. Todos los derechos reservados.</p>
+            <p>Diseñado con ❤️ para La Habana</p>
+        </div>
+    </footer>
+
     <script src="data.js"></script>
     <script>
+        // ==================== TEMA OSCURO PERSISTENTE ====================
+        let isDarkMode = localStorage.getItem('darkMode') === 'true';
+        
+        function applyThemeLanding() {
+            const landingThemeIcon = document.getElementById('landingThemeIcon');
+            
+            if (isDarkMode) {
+                document.body.classList.add('dark-mode');
+                if (landingThemeIcon) {
+                    landingThemeIcon.src = 'resources/icons_dark/sun.png';
+                }
+            } else {
+                document.body.classList.remove('dark-mode');
+                if (landingThemeIcon) {
+                    landingThemeIcon.src = 'resources/icons_light/moon.png';
+                }
+            }
+        }
+        
+        document.getElementById('themeToggleLanding')?.addEventListener('click', () => {
+            isDarkMode = !isDarkMode;
+            localStorage.setItem('darkMode', isDarkMode);
+            applyThemeLanding();
+        });
+        
+        applyThemeLanding();
+        
+        // ==================== CARGAR EVENTOS DESTACADOS ====================
         function cargarEventosDestacados() {
             const container = document.getElementById('eventos-destacados');
             const eventos = getEventosFuturos();
