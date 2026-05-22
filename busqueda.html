@@ -199,6 +199,10 @@
     <script src="notifications.js"></script>
     <script src="script.js"></script>
     <script>
+        // Aplicar color primario del usuario logueado (si existe)
+        if (typeof aplicarColorPrimarioUsuario === 'function') {
+            aplicarColorPrimarioUsuario();
+        }
         // ==================== INICIALIZACIÓN ESPECÍFICA ====================
         const urlParams = new URLSearchParams(window.location.search);
         const terminoBusqueda = urlParams.get('q') || '';

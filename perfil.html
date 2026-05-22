@@ -363,13 +363,12 @@
                     <div class="theme-options">
                         <div class="theme-option" data-theme="light">Claro</div>
                         <div class="theme-option" data-theme="dark">Oscuro</div>
-                        <div class="theme-option" data-theme="system">Seguir sistema</div>
                     </div>
                     
                     <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; margin-top: 1rem;">Color principal</label>
                     <div class="color-palette">
                         <div class="color-option" style="background: #025a8a;" data-color="#025a8a"></div>
-                        <div class="color-option" style="background: #2ecc71;" data-color="#2ecc71"></div>
+                        <div class="color-option" style="background: #027f34;" data-color="#027f34"></div>
                         <div class="color-option" style="background: #e67e22;" data-color="#e67e22"></div>
                         <div class="color-option" style="background: #9b59b6;" data-color="#9b59b6"></div>
                         <div class="color-option" style="background: #e74c3c;" data-color="#e74c3c"></div>
@@ -569,9 +568,9 @@
             // Al guardar cambios, incluir preferencias de notificación
             // En el objeto usuarioActualizado agregar:
             preferenciasNotificacion: {
-                sieteDias: document.querySelector('.notif-option[data-notif="sieteDias"]')?.classList.contains('active') || false,
-                treintaMinutos: document.querySelector('.notif-option[data-notif="treintaMinutos"]')?.classList.contains('active') || false,
-                unaHora: document.querySelector('.notif-option[data-notif="unaHora"]')?.classList.contains('active') || false
+                sieteDias: document.querySelector('.notif-option[data-notif="sieteDias"]')?.classList.contains('active') || false;
+                treintaMinutos: document.querySelector('.notif-option[data-notif="treintaMinutos"]')?.classList.contains('active') || false;
+                unaHora: document.querySelector('.notif-option[data-notif="unaHora"]')?.classList.contains('active') || false;
             }
             
             // ==================== TEMA ====================
@@ -593,16 +592,8 @@
             });
             
             function aplicarTemaSegunPreferencia() {
-                const pref = localStorage.getItem('themePreference') || 'system';
-                let darkMode = false;
-                
-                if (pref === 'dark') {
-                    darkMode = true;
-                } else if (pref === 'light') {
-                    darkMode = false;
-                } else {
-                    darkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                }
+                const pref = localStorage.getItem('themePreference') || 'light';
+                let darkMode = pref === 'dark';
                 
                 if (darkMode) {
                     document.body.classList.add('dark-mode');
@@ -613,7 +604,7 @@
                 isDarkMode = darkMode;
                 localStorage.setItem('darkMode', darkMode);
                 
-                // Actualizar icono del botón de tema en la barra superior
+                // Actualizar icono del botón de tema
                 const themeIconLight = document.getElementById('themeIconLight');
                 const themeIconDark = document.getElementById('themeIconDark');
                 if (themeIconLight && themeIconDark) {
@@ -628,15 +619,24 @@
             }
             
             // ==================== COLOR PRIMARIO ====================
-            const colorPreference = localStorage.getItem('colorPrimary') || '#025a8a';
+            let colorPreference = localStorage.getItem('colorPrimario') || '#025a8a';
+
+            // Verificar si el usuario tiene color guardado en su perfil
+            const usuarioActualPerfil = getUsuarioActual();
+            if (usuarioActualPerfil && usuarioActualPerfil.colorPrimario) {
+                colorPreference = usuarioActualPerfil.colorPrimario;
+            }
+
             const colorOptions = document.querySelectorAll('.color-option');
-            
+
             function aplicarColorPrimario(color) {
                 document.documentElement.style.setProperty('--color-primary', color);
-                document.documentElement.style.setProperty('--color-primary-hover', color + 'cc');
-                localStorage.setItem('colorPrimary', color);
+                const hoverColor = lightenColor(color, 10);
+                document.documentElement.style.setProperty('--color-primary-hover', hoverColor);
+                localStorage.setItem('colorPrimario', color);
+                colorPreference = color;
             }
-            
+
             colorOptions.forEach(option => {
                 const color = option.getAttribute('data-color');
                 if (color === colorPreference) {
@@ -646,10 +646,11 @@
                 option.addEventListener('click', () => {
                     colorOptions.forEach(opt => opt.classList.remove('selected'));
                     option.classList.add('selected');
-                    aplicarColorPrimario(color);
+                    const selectedColor = option.getAttribute('data-color');
+                    aplicarColorPrimario(selectedColor);
                 });
             });
-            
+
             // ==================== GUARDAR CAMBIOS ====================
             document.getElementById('saveChangesBtn').addEventListener('click', () => {
                 const nombre = document.getElementById('nombre').value.trim();
@@ -669,10 +670,15 @@
                     telefonoCompleto = '+53 ' + telefono;
                 }
                 
+                // Obtener el color seleccionado actualmente
+                const selectedColorOption = document.querySelector('.color-option.selected');
+                const colorSeleccionado = selectedColorOption ? selectedColorOption.getAttribute('data-color') : '#025a8a';
+                
                 const usuarioActualizado = {
                     ...usuarioActual,
                     nombre: nombre,
                     telefono: telefonoCompleto,
+                    colorPrimario: colorSeleccionado,
                     preferencias: preferenciasActuales,
                     preferenciasNotificacion: {
                         sieteDias: document.querySelector('.notif-option[data-notif="sieteDias"]')?.classList.contains('active') || false,
@@ -682,6 +688,8 @@
                 };
                 
                 if (actualizarUsuario(usuarioActualizado)) {
+                    // Aplicar el color inmediatamente
+                    aplicarColorPrimario(colorSeleccionado);
                     mostrarMensaje('✅ Cambios guardados correctamente', 'success');
                     setTimeout(() => window.location.reload(), 1500);
                 } else {

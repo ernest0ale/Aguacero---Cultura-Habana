@@ -290,263 +290,40 @@
 
     <script src="data.js"></script>
     <script>
-        // ==================== TEMA OSCURO PERSISTENTE ====================
-        let isDarkMode = localStorage.getItem('darkMode') === 'true';
-        
-        function applyTheme() {
-            if (isDarkMode) {
-                document.body.classList.add('dark-mode');
-            } else {
-                document.body.classList.remove('dark-mode');
-            }
+        // Tema oscuro
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.body.classList.add('dark-mode');
         }
         
-        applyTheme();
-        
-        // ==================== MOSTRAR/OCULTAR CONTRASEÑA ====================
         function togglePassword(fieldId) {
             const field = document.getElementById(fieldId);
-            if (field.type === 'password') {
-                field.type = 'text';
-            } else {
-                field.type = 'password';
-            }
+            field.type = field.type === 'password' ? 'text' : 'password';
         }
+        window.togglePassword = togglePassword;
         
-        // ==================== FUNCIÓN PARA OBTENER IDENTIFICADOR NORMALIZADO ====================
+        // Normalizar identificador (email o teléfono)
         function normalizarIdentificador(input) {
             const trimmed = input.trim();
-            // Si es solo números (8 dígitos), devolver como teléfono con +53
             if (/^\d{8}$/.test(trimmed)) {
                 return { type: 'phone', value: '+53 ' + trimmed };
             }
-            // Si es email (contiene @)
             if (trimmed.includes('@')) {
                 return { type: 'email', value: trimmed };
             }
             return null;
         }
         
-        // ==================== RECUPERACIÓN DE CONTRASEÑA ====================
-        let currentMethod = 'email';
-        let generatedCode = null;
-        let codeExpiry = null;
-        let resendAttempts = 0;
-        let resendBlockedUntil = null;
-        let userEmailForReset = null;
-        
-        const modal = document.getElementById('recoveryModal');
-        const step1 = document.getElementById('recoveryStep1');
-        const step2 = document.getElementById('recoveryStep2');
-        const step3 = document.getElementById('recoveryStep3');
-        const contactInputDiv = document.getElementById('contact-input');
-        const codeInfo = document.getElementById('code-info');
-        
-        function actualizarContactInput() {
-            if (currentMethod === 'email') {
-                contactInputDiv.innerHTML = `<input type="email" id="contact-value" class="method-email-input" placeholder="correo@ejemplo.com">`;
-            } else {
-                contactInputDiv.innerHTML = `
-                    <div class="phone-input-wrapper">
-                        <span class="phone-prefix-modal">+53</span>
-                        <input type="tel" id="contact-value" class="phone-number-modal" placeholder="5XXXXXXXX" maxlength="8">
-                    </div>
-                    <small style="color: var(--color-text-secondary); font-size: 0.7rem;">8 dígitos (ejemplo: 51234567)</small>
-                `;
-            }
-        }
-        
-        document.getElementById('forgotPasswordBtn').addEventListener('click', (e) => {
-            e.preventDefault();
-            modal.classList.add('active');
-            step1.style.display = 'block';
-            step2.style.display = 'none';
-            step3.style.display = 'none';
-            generatedCode = null;
-            codeExpiry = null;
-            actualizarContactInput();
-        });
-        
-        document.querySelectorAll('.method-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.querySelectorAll('.method-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                currentMethod = btn.getAttribute('data-method');
-                actualizarContactInput();
-            });
-        });
-        document.querySelector('.method-btn').classList.add('active');
-        
-        function generateCode() {
-            return Math.floor(10000000 + Math.random() * 90000000).toString();
-        }
-        
-        document.getElementById('sendCodeBtn').addEventListener('click', () => {
-            let contactValue = document.getElementById('contact-value')?.value.trim();
-            if (!contactValue) {
-                mostrarError('Ingresa tu correo o teléfono');
-                return;
-            }
-            
-            const usuarios = getUsuarios();
-            let usuarioEncontrado = null;
-            
-            if (currentMethod === 'email') {
-                usuarioEncontrado = usuarios.find(u => u.email === contactValue);
-            } else {
-                if (!/^\d{8}$/.test(contactValue)) {
-                    mostrarError('Ingresa 8 dígitos válidos');
-                    return;
-                }
-                const telefonoCompleto = '+53 ' + contactValue;
-                usuarioEncontrado = usuarios.find(u => u.telefono === telefonoCompleto);
-            }
-            
-            if (!usuarioEncontrado) {
-                mostrarError('No se encontró una cuenta con esos datos');
-                return;
-            }
-            
-            userEmailForReset = usuarioEncontrado.email;
-            
-            if (resendBlockedUntil && new Date() < resendBlockedUntil) {
-                const minutesLeft = Math.ceil((resendBlockedUntil - new Date()) / 60000);
-                mostrarError(`Has excedido los intentos. Espera ${minutesLeft} minutos.`);
-                return;
-            }
-            
-            generatedCode = generateCode();
-            codeExpiry = new Date(Date.now() + 5 * 60000);
-            
-            const contactoMostrar = currentMethod === 'email' ? contactValue : `+53 ${contactValue}`;
-            alert(`🔐 Código de verificación (simulado): ${generatedCode}\n\nEn una implementación real, esto se enviaría a ${contactoMostrar}`);
-            
-            step1.style.display = 'none';
-            step2.style.display = 'block';
-            updateTimerDisplay();
-            
-            const timer = setInterval(() => {
-                if (!codeExpiry || new Date() > codeExpiry) {
-                    clearInterval(timer);
-                    codeInfo.innerHTML = '⏰ El código ha expirado. <a href="#" id="expired-resend">Solicita uno nuevo</a>';
-                    document.getElementById('expired-resend')?.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        resendCode();
-                    });
-                } else {
-                    updateTimerDisplay();
-                }
-            }, 1000);
-        });
-        
-        function updateTimerDisplay() {
-            if (codeExpiry) {
-                const remaining = Math.max(0, Math.floor((codeExpiry - new Date()) / 1000));
-                const minutes = Math.floor(remaining / 60);
-                const seconds = remaining % 60;
-                codeInfo.innerHTML = `📨 El código expira en ${minutes}:${seconds.toString().padStart(2,'0')}`;
-            }
-        }
-        
-        function resendCode() {
-            const now = new Date();
-            if (resendBlockedUntil && now < resendBlockedUntil) {
-                const minutesLeft = Math.ceil((resendBlockedUntil - now) / 60000);
-                mostrarError(`Debes esperar ${minutesLeft} minutos para solicitar otro código.`);
-                return;
-            }
-            
-            resendAttempts++;
-            let waitMinutes = 5;
-            if (resendAttempts === 2) waitMinutes = 15;
-            if (resendAttempts >= 3) {
-                resendBlockedUntil = new Date(now.getTime() + 4 * 3600000);
-                mostrarError('Has excedido los intentos. Espera 4 horas.');
-                return;
-            }
-            
-            generatedCode = generateCode();
-            codeExpiry = new Date(Date.now() + waitMinutes * 60000);
-            alert(`🔐 Nuevo código: ${generatedCode}\nVálido por ${waitMinutes} minutos.`);
-            updateTimerDisplay();
-        }
-        
-        document.getElementById('resendCodeBtn')?.addEventListener('click', resendCode);
-        
-        document.getElementById('verifyCodeBtn').addEventListener('click', () => {
-            const enteredCode = document.getElementById('verification-code').value.trim();
-            if (!enteredCode) {
-                mostrarError('Ingresa el código de verificación');
-                return;
-            }
-            if (new Date() > codeExpiry) {
-                mostrarError('El código ha expirado. Solicita uno nuevo.');
-                return;
-            }
-            if (enteredCode !== generatedCode) {
-                mostrarError('Código incorrecto');
-                return;
-            }
-            
-            step2.style.display = 'none';
-            step3.style.display = 'block';
-        });
-        
-        document.getElementById('resetPasswordBtn').addEventListener('click', () => {
-            const newPass = document.getElementById('new-password').value;
-            const confirmPass = document.getElementById('confirm-password').value;
-            
-            if (!newPass || newPass.length < 4) {
-                mostrarError('La contraseña debe tener al menos 4 caracteres');
-                return;
-            }
-            if (newPass !== confirmPass) {
-                mostrarError('Las contraseñas no coinciden');
-                return;
-            }
-            
-            const usuarios = getUsuarios();
-            const userIndex = usuarios.findIndex(u => u.email === userEmailForReset);
-            if (userIndex !== -1) {
-                usuarios[userIndex].password = newPass;
-                guardarUsuarios(usuarios);
-                alert('✅ Contraseña actualizada correctamente. Ahora puedes iniciar sesión.');
-                closeRecoveryModal();
-            }
-        });
-        
-        function closeRecoveryModal() {
-            modal.classList.remove('active');
-            step1.style.display = 'block';
-            step2.style.display = 'none';
-            step3.style.display = 'none';
-            generatedCode = null;
-            codeExpiry = null;
-            document.getElementById('verification-code').value = '';
-            document.getElementById('new-password').value = '';
-            document.getElementById('confirm-password').value = '';
-        }
-        
-        function mostrarError(mensaje) {
-            const errorDiv = document.getElementById('error-message');
-            errorDiv.textContent = mensaje;
-            errorDiv.style.display = 'block';
-            setTimeout(() => { errorDiv.style.display = 'none'; }, 3000);
-        }
-        
-        window.closeRecoveryModal = closeRecoveryModal;
-        window.togglePassword = togglePassword;
-        
-        // ==================== LOGIN CON EMAIL O TELÉFONO ====================
+        // Login
         document.getElementById('login-form').addEventListener('submit', (e) => {
             e.preventDefault();
+            
             const identifier = document.getElementById('loginIdentifier').value.trim();
             const password = document.getElementById('password').value;
             
             const normalizado = normalizarIdentificador(identifier);
             
             if (!normalizado) {
-                mostrarError('Ingresa un correo válido o un teléfono de 8 dígitos');
+                alert('Ingresa un correo válido o un teléfono de 8 dígitos');
                 return;
             }
             
@@ -554,29 +331,32 @@
             if (normalizado.type === 'email') {
                 resultado = iniciarSesion(normalizado.value, password);
             } else {
-                resultado = iniciarSesionPorTelefono(normalizado.value, password);
+                // Buscar por teléfono
+                const usuarios = getUsuarios();
+                const usuario = usuarios.find(u => u.telefono === normalizado.value && u.password === password);
+                if (usuario) {
+                    localStorage.setItem('usuarioActual', JSON.stringify(usuario));
+                    resultado = { exito: true, usuario };
+                } else {
+                    resultado = { exito: false, mensaje: "Teléfono o contraseña incorrectos" };
+                }
             }
             
             if (resultado.exito) {
-                window.location.href = 'inicio.html';
+                // Verificar que se guardó la sesión
+                const sesion = localStorage.getItem('usuarioActual');
+                if (sesion) {
+                    window.location.href = 'inicio.html';
+                } else {
+                    alert('Error al guardar la sesión. Intenta nuevamente.');
+                }
             } else {
-                mostrarError(resultado.mensaje);
+                alert(resultado.mensaje);
             }
         });
         
-        // Función auxiliar para iniciar sesión por teléfono
-        function iniciarSesionPorTelefono(telefono, password) {
-            const usuarios = getUsuarios();
-            const usuario = usuarios.find(u => u.telefono === telefono && u.password === password);
-            if (usuario) {
-                localStorage.setItem('usuarioActual', JSON.stringify(usuario));
-                return { exito: true, usuario };
-            }
-            return { exito: false, mensaje: "Teléfono o contraseña incorrectos" };
-        }
-        
-        // Verificar si ya hay sesión activa
-        if (getUsuarioActual()) {
+        // Si ya hay sesión, redirigir
+        if (localStorage.getItem('usuarioActual')) {
             window.location.href = 'inicio.html';
         }
     </script>

@@ -1,10 +1,9 @@
-// data.js - Base de datos local con localStorage y sistema de eliminación
+// data.js - Base de datos local con localStorage
 
 const ADMIN_EMAILS = [
-    "organizador@culturahabana.com",  // Email del administrador principal
-    "admin0428@knowwhere.com",        // Tu email personal
-    "adcuenta@redessociales.com",   // Email de la cuenta de redes
-    "admincreador@culturahabana.cu"
+    "organizador@culturahabana.com",
+    "admin0428@knowwhere.com",
+    "adcuenta@redessociales.com"
 ];
 
 function esAdministrador(usuario) {
@@ -12,27 +11,19 @@ function esAdministrador(usuario) {
     return ADMIN_EMAILS.includes(usuario.email);
 }
 
-// Solo para crear/editar eventos
 function puedeCrearEvento(usuario) {
     return esAdministrador(usuario);
 }
 
-function puedeEditarEvento(usuario, evento) {
-    return esAdministrador(usuario);
-}
-
-function puedeEliminarEvento(usuario, evento) {
-    return esAdministrador(usuario);
-}
-
 const eventosEjemplo = [
+    // ... (tus eventos de ejemplo existentes) ...
     {
         id: "evt_001",
         nombre: "VAN VAN - Concierto Especial",
         categoria: "Conciertos",
         descripcion: "La leyenda de la música cubana en concierto único.",
-        fechaInicio: "2026-05-20",
-        fechaFin: "2026-05-20",
+        fechaInicio: "2026-05-15",
+        fechaFin: "2026-05-15",
         horaInicio: "21:00",
         horaFin: "02:00",
         precio: 500,
@@ -55,8 +46,8 @@ const eventosEjemplo = [
         nombre: "Lachy Fortuna - Session Especial",
         categoria: "Farándula",
         descripcion: "El ex-charanguero presenta su nuevo proyecto musical.",
-        fechaInicio: "2026-05-22",
-        fechaFin: "2026-05-22",
+        fechaInicio: "2026-05-18",
+        fechaFin: "2026-05-18",
         horaInicio: "22:00",
         horaFin: "03:00",
         precio: 350,
@@ -79,8 +70,8 @@ const eventosEjemplo = [
         nombre: "Taller de Pintura Calcónica",
         categoria: "Talleres",
         descripcion: "Aprende técnicas de pintura calcónica.",
-        fechaInicio: "2026-05-25",
-        fechaFin: "2026-06-01",
+        fechaInicio: "2026-05-20",
+        fechaFin: "2026-05-27",
         horaInicio: "09:00",
         horaFin: "12:00",
         precio: 25,
@@ -103,8 +94,8 @@ const eventosEjemplo = [
         nombre: "Exposición de Arte Contemporáneo",
         categoria: "Exposiciones",
         descripcion: "Obras de artistas cubanos emergentes.",
-        fechaInicio: "2026-05-28",
-        fechaFin: "2026-06-18",
+        fechaInicio: "2026-05-25",
+        fechaFin: "2026-06-15",
         horaInicio: "10:00",
         horaFin: "18:00",
         precio: 0,
@@ -127,8 +118,8 @@ const eventosEjemplo = [
         nombre: "Cine Cubano: Retrospectiva",
         categoria: "Cine",
         descripcion: "Funciones especiales de cine cubano.",
-        fechaInicio: "2026-06-01",
-        fechaFin: "2026-06-08",
+        fechaInicio: "2026-05-28",
+        fechaFin: "2026-06-05",
         horaInicio: "15:00",
         horaFin: "22:00",
         precio: 100,
@@ -151,8 +142,8 @@ const eventosEjemplo = [
         nombre: "Festival de Danza",
         categoria: "Danza",
         descripcion: "Compañías de danza de toda la isla.",
-        fechaInicio: "2026-06-05",
-        fechaFin: "2026-06-07",
+        fechaInicio: "2026-06-01",
+        fechaFin: "2026-06-03",
         horaInicio: "19:00",
         horaFin: "21:30",
         precio: 800,
@@ -173,88 +164,61 @@ const eventosEjemplo = [
 ];
 
 function inicializarDatos() {
+    console.log("🔧 Inicializando datos...");
+    
     if (!localStorage.getItem('eventos')) {
+        console.log("📅 Creando eventos de ejemplo...");
         localStorage.setItem('eventos', JSON.stringify(eventosEjemplo));
     }
+    
     if (!localStorage.getItem('usuarios')) {
+        console.log("👥 Creando usuarios de ejemplo...");
         const usuariosIniciales = [
             { 
                 id: "user_001", 
-                email: "ocarlos@example.com", 
+                email: "usuario@example.com", 
                 password: "123456", 
-                nombre: "Carlos Pérez", 
+                nombre: "Usuario Ejemplo", 
                 rol: "usuario", 
                 telefono: "+53 51234567", 
                 avatarColor: "#2ecc71",
-                preferencias: ["Conciertos", "Teatro", "Cine"],
+                colorPrimario: "#025a8a",
+                preferencias: ["Conciertos", "Teatro"],
                 estado: "activo",
                 fechaDesactivacion: null,
-                fechaEliminacion: null
+                fechaEliminacion: null,
+                preferenciasNotificacion: {
+                    sieteDias: true,
+                    treintaMinutos: true,
+                    unaHora: false
+                },
+                recordatorios: [] // Lista de IDs de eventos que el usuario quiere recordar
             },
             { 
                 id: "user_002", 
-                email: "usuario@example.com", 
-                password: "123456", 
-                nombre: "Laura Gómez", 
-                rol: "usuario", 
-                telefono: "+53 59876543", 
-                avatarColor: "#3498db",
-                preferencias: ["Danza", "Exposiciones", "Libros"],
-                estado: "activo",
-                fechaDesactivacion: null,
-                fechaEliminacion: null
-            },
-            { 
-                id: "user_003", 
                 email: "organizador@culturahabana.com", 
                 password: "12345678", 
-                nombre: "Aguacero Admin", 
+                nombre: "Administrador", 
                 rol: "usuario", 
                 telefono: "+53 51234567", 
-                avatarColor: "#3498db",
-                preferencias: ["Danza", "Exposiciones", "Libros"],
-                estado: "activo",
-                fechaDesactivacion: null,
-                fechaEliminacion: null
-            },
-            { 
-                id: "user_004", 
-                email: "admincreador@culturahabana.cu", 
-                password: "admin1128", 
-                nombre: "Admin Creador", 
-                rol: "usuario", 
-                telefono: "+53 51765432", 
-                avatarColor: "#3498db",
+                avatarColor: "#e74c3c",
+                colorPrimario: "#025a8a",
                 preferencias: [],
                 estado: "activo",
                 fechaDesactivacion: null,
-                fechaEliminacion: null
+                fechaEliminacion: null,
+                preferenciasNotificacion: {
+                    sieteDias: true,
+                    treintaMinutos: true,
+                    unaHora: false
+                },
+                recordatorios: []
             }
         ];
         localStorage.setItem('usuarios', JSON.stringify(usuariosIniciales));
     }
-        // Crear usuario administrador si no existe
-    const usuarios = getUsuarios();
-    const adminExists = usuarios.some(u => ADMIN_EMAILS.includes(u.email));
     
-    if (!adminExists && ADMIN_EMAILS.length > 0) {
-        const adminUser = {
-            id: "user_admin_" + Date.now(),
-            email: ADMIN_EMAILS[0],
-            password: "Admin123!",  // Contraseña temporal (cambiarla en el primer inicio)
-            nombre: "Administrador",
-            telefono: "51234567",
-            rol: "usuario",
-            avatarColor: "#e74c3c",
-            preferencias: [],
-            estado: "activo",
-            fechaDesactivacion: null,
-            fechaEliminacion: null
-        };
-        usuarios.push(adminUser);
-        guardarUsuarios(usuarios);
-        console.log("✅ Usuario administrador creado con email:", ADMIN_EMAILS[0]);
-    }
+    console.log("✅ Inicialización completada");
 }
 
 function getEventos() { 
@@ -279,24 +243,7 @@ function agregarEvento(evento) {
 }
 
 function getUsuarios() { 
-    const usuarios = JSON.parse(localStorage.getItem('usuarios')) || [];
-    // Limpiar usuarios eliminados que pasaron los 14 días
-    const ahora = new Date();
-    let cambios = false;
-    const usuariosFiltrados = usuarios.filter(usuario => {
-        if (usuario.estado === 'eliminado' && usuario.fechaEliminacion) {
-            const fechaElim = new Date(usuario.fechaEliminacion);
-            if (ahora > fechaElim) {
-                cambios = true;
-                return false;
-            }
-        }
-        return true;
-    });
-    if (cambios) {
-        guardarUsuarios(usuariosFiltrados);
-    }
-    return usuariosFiltrados;
+    return JSON.parse(localStorage.getItem('usuarios')) || []; 
 }
 
 function guardarUsuarios(usuarios) {
@@ -304,48 +251,57 @@ function guardarUsuarios(usuarios) {
 }
 
 function registrarUsuario(usuario) {
+    console.log("📝 RegistrarUsuario llamado con:", usuario);
     const usuarios = getUsuarios();
+    
     if (usuarios.find(u => u.email === usuario.email)) {
+        console.log("❌ Email ya registrado:", usuario.email);
         return { exito: false, mensaje: "El correo ya está registrado" };
     }
+    
     const colores = ['#2ecc71', '#3498db', '#e74c3c', '#f39c12', '#9b59b6', '#1abc9c', '#e67e22'];
     const nuevoUsuario = { 
         ...usuario, 
         id: "user_" + Date.now(), 
         avatarColor: colores[Math.floor(Math.random() * colores.length)],
+        colorPrimario: "#025a8a",
         preferencias: usuario.preferencias || [],
-        rol: "usuario",  // ← Forzar siempre usuario
+        rol: "usuario",
         estado: "activo",
         fechaDesactivacion: null,
-        fechaEliminacion: null
+        fechaEliminacion: null,
+        preferenciasNotificacion: {
+            sieteDias: true,
+            treintaMinutos: true,
+            unaHora: false
+        },
+        recordatorios: [] // Lista de IDs de eventos a recordar
     };
+    
     usuarios.push(nuevoUsuario);
     guardarUsuarios(usuarios);
+    console.log("✅ Usuario registrado:", nuevoUsuario.email);
     return { exito: true, usuario: nuevoUsuario };
 }
 
 function iniciarSesion(email, password) {
+    console.log("🔐 IniciarSesion llamado con:", email, password);
     const usuarios = getUsuarios();
+    
     const usuario = usuarios.find(u => u.email === email && u.password === password);
     
     if (!usuario) {
+        console.log("❌ Usuario no encontrado");
         return { exito: false, mensaje: "Correo o contraseña incorrectos" };
     }
     
-    // Verificar si la cuenta está deshabilitada
     if (usuario.estado === 'deshabilitado') {
-        const fechaDesac = new Date(usuario.fechaDesactivacion);
-        const ahora = new Date();
-        const diasRestantes = Math.ceil((fechaDesac.getTime() + 14 * 24 * 60 * 60 * 1000 - ahora.getTime()) / (1000 * 60 * 60 * 24));
-        
-        if (diasRestantes > 0) {
-            return { 
-                exito: false, 
-                mensaje: `Tu cuenta está desactivada. Tienes ${diasRestantes} días para recuperarla.`,
-                necesitaRecuperacion: true,
-                email: usuario.email
-            };
-        }
+        return { 
+            exito: false, 
+            mensaje: "Tu cuenta está desactivada",
+            necesitaRecuperacion: true,
+            email: usuario.email
+        };
     }
     
     localStorage.setItem('usuarioActual', JSON.stringify(usuario));
@@ -353,17 +309,14 @@ function iniciarSesion(email, password) {
 }
 
 function cerrarSesion() { 
-    localStorage.removeItem('usuarioActual'); 
+    localStorage.removeItem('usuarioActual');
+    // Eliminar el color primario personalizado al cerrar sesión
+    localStorage.removeItem('colorPrimario');
 }
 
 function getUsuarioActual() { 
-    const u = localStorage.getItem('usuarioActual'); 
+    const u = localStorage.getItem('usuarioActual');
     return u ? JSON.parse(u) : null; 
-}
-
-function esOrganizador() { 
-    const u = getUsuarioActual(); 
-    return u && u.rol === 'organizador'; 
 }
 
 function actualizarUsuario(usuarioActualizado) {
@@ -372,7 +325,6 @@ function actualizarUsuario(usuarioActualizado) {
     if (index !== -1) {
         usuarios[index] = usuarioActualizado;
         guardarUsuarios(usuarios);
-        // Actualizar sesión actual si es el mismo usuario
         const usuarioActual = getUsuarioActual();
         if (usuarioActual && usuarioActual.id === usuarioActualizado.id) {
             localStorage.setItem('usuarioActual', JSON.stringify(usuarioActualizado));
@@ -402,52 +354,12 @@ function desactivarCuenta(email, confirmText) {
     
     guardarUsuarios(usuarios);
     
-    // Cerrar sesión si era el usuario actual
     const usuarioActual = getUsuarioActual();
     if (usuarioActual && usuarioActual.email === email) {
         cerrarSesion();
     }
     
-    return { exito: true, mensaje: `Cuenta desactivada. Tendrás 14 días para recuperarla (hasta ${fechaEliminacion.toLocaleDateString()})` };
-}
-
-function recuperarCuenta(email, codigo, nuevoPassword) {
-    const usuarios = getUsuarios();
-    const index = usuarios.findIndex(u => u.email === email);
-    if (index === -1) {
-        return { exito: false, mensaje: 'Usuario no encontrado' };
-    }
-    
-    if (usuarios[index].estado !== 'deshabilitado') {
-        return { exito: false, mensaje: 'Esta cuenta no está en período de recuperación' };
-    }
-    
-    const fechaDesac = new Date(usuarios[index].fechaDesactivacion);
-    const ahora = new Date();
-    const diasTranscurridos = (ahora - fechaDesac) / (1000 * 60 * 60 * 24);
-    
-    if (diasTranscurridos > 14) {
-        return { exito: false, mensaje: 'El período de recuperación ha expirado. La cuenta será eliminada permanentemente.' };
-    }
-    
-    // Verificar código (simulado)
-    if (codigo !== '12345678') {
-        return { exito: false, mensaje: 'Código incorrecto' };
-    }
-    
-    usuarios[index].estado = 'activo';
-    usuarios[index].fechaDesactivacion = null;
-    usuarios[index].fechaEliminacion = null;
-    if (nuevoPassword) {
-        usuarios[index].password = nuevoPassword;
-    }
-    
-    guardarUsuarios(usuarios);
-    
-    // Iniciar sesión automáticamente
-    iniciarSesion(email, nuevoPassword || usuarios[index].password);
-    
-    return { exito: true, mensaje: 'Cuenta recuperada exitosamente' };
+    return { exito: true, mensaje: `Cuenta desactivada. Tendrás 14 días para recuperarla.` };
 }
 
 function getEventosFuturos() {
@@ -472,7 +384,6 @@ function buscarEventos(termino) {
     );
 }
 
-// ==================== ELIMINACIÓN AUTOMÁTICA DE EVENTOS ====================
 function limpiarEventosExpirados() {
     const eventos = getEventos();
     const ahora = new Date();
@@ -514,7 +425,6 @@ function limpiarEventosExpirados() {
     }
 }
 
-// Ejecutar al cargar la página y cada hora
 limpiarEventosExpirados();
 setInterval(limpiarEventosExpirados, 60 * 60 * 1000);
 
@@ -540,9 +450,6 @@ function getIcono(categoria) {
     return iconos[categoria] || '📌';
 }
 
-inicializarDatos();
-
-// ==================== FUNCIONES PARA OBTENER ETIQUETAS DE CARACTERÍSTICAS ====================
 function getEtiquetaAptoMenores(aptoMenores) {
     if (aptoMenores === true) {
         return { texto: '👶 Apto para menores', clase: 'badge-menores-si' };
@@ -558,3 +465,91 @@ function getEtiquetaAireLibre(aireLibre) {
         return { texto: '🏠 Bajo techo', clase: 'badge-aire-no' };
     }
 }
+
+function actualizarEvento(id, datosActualizados) {
+    const eventos = getEventos();
+    const index = eventos.findIndex(e => e.id === id);
+    
+    if (index === -1) {
+        console.log("❌ Evento no encontrado:", id);
+        return false;
+    }
+    
+    eventos[index] = { ...eventos[index], ...datosActualizados, id: eventos[index].id };
+    guardarEventos(eventos);
+    console.log("✅ Evento actualizado:", eventos[index].nombre);
+    return true;
+}
+
+function eliminarEvento(id) {
+    const eventos = getEventos();
+    const index = eventos.findIndex(e => e.id === id);
+    
+    if (index === -1) {
+        console.log("❌ Evento no encontrado:", id);
+        return false;
+    }
+    
+    const eventoEliminado = eventos[index];
+    eventos.splice(index, 1);
+    guardarEventos(eventos);
+    console.log("🗑️ Evento eliminado:", eventoEliminado.nombre);
+    return true;
+}
+
+function puedeEditarEvento(usuario, evento) {
+    if (!usuario) return false;
+    if (esAdministrador(usuario)) return true;
+    return evento.creadoPor === usuario.id;
+}
+
+// Función para agregar un evento a los recordatorios del usuario
+function agregarRecordatorio(usuarioId, eventoId) {
+    const usuarios = getUsuarios();
+    const usuario = usuarios.find(u => u.id === usuarioId);
+    if (usuario && !usuario.recordatorios.includes(eventoId)) {
+        usuario.recordatorios.push(eventoId);
+        guardarUsuarios(usuarios);
+        
+        // Actualizar la sesión actual si es el mismo usuario
+        const usuarioActual = getUsuarioActual();
+        if (usuarioActual && usuarioActual.id === usuarioId) {
+            usuarioActual.recordatorios = usuario.recordatorios;
+            localStorage.setItem('usuarioActual', JSON.stringify(usuarioActual));
+        }
+        return true;
+    }
+    return false;
+}
+
+// Función para eliminar un evento de los recordatorios
+function eliminarRecordatorio(usuarioId, eventoId) {
+    const usuarios = getUsuarios();
+    const usuario = usuarios.find(u => u.id === usuarioId);
+    if (usuario) {
+        const index = usuario.recordatorios.indexOf(eventoId);
+        if (index !== -1) {
+            usuario.recordatorios.splice(index, 1);
+            guardarUsuarios(usuarios);
+            
+            // Actualizar la sesión actual
+            const usuarioActual = getUsuarioActual();
+            if (usuarioActual && usuarioActual.id === usuarioId) {
+                usuarioActual.recordatorios = usuario.recordatorios;
+                localStorage.setItem('usuarioActual', JSON.stringify(usuarioActual));
+            }
+            return true;
+        }
+    }
+    return false;
+}
+
+// Función para verificar si un evento está en los recordatorios del usuario
+function esRecordatorio(usuarioId, eventoId) {
+    if (!usuarioId) return false;
+    const usuarios = getUsuarios();
+    const usuario = usuarios.find(u => u.id === usuarioId);
+    return usuario ? usuario.recordatorios.includes(eventoId) : false;
+}
+
+inicializarDatos();

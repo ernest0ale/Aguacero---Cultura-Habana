@@ -1,6 +1,15 @@
 ﻿﻿// ==================== VARIABLES GLOBALES ====================
 let isDarkMode = localStorage.getItem('darkMode') === 'true';
 
+// Asegurar que esAdministrador esté disponible
+if (typeof esAdministrador === 'undefined') {
+    window.esAdministrador = function(usuario) {
+        if (!usuario) return false;
+        const ADMIN_EMAILS = ["organizador@culturahabana.com", "admin0428@knowwhere.com", "adcuenta@redessociales.com"];
+        return ADMIN_EMAILS.includes(usuario.email);
+    };
+}
+
 // ==================== DETECTAR MÓVIL ====================
 function isMobile() {
     return window.innerWidth <= 700;
@@ -29,7 +38,6 @@ function getIconoCategoria(categoria) {
     return iconos[categoria] || '📌';
 }
 
-// ==================== FUNCIÓN PARA OBTENER PREFERENCIAS DEL USUARIO ====================
 function getPreferenciasUsuario() {
     const usuario = getUsuarioActual();
     return usuario?.preferencias || [];
@@ -49,14 +57,10 @@ function initSidebar() {
     let tooltipTimeout = null;
     
     const currentPage = window.location.pathname.split('/').pop() || 'inicio.html';
-    
-    // Variable para mantener el estado de categorías (abierto/cerrado)
     let isCategoriasOpen = false;
     
-    // ========== FUNCIÓN PARA OBTENER ALTURA REAL DEL SUBMENÚ ==========
     function getSubmenuRealHeight() {
         if (!submenuCategorias) return 0;
-        // Guardar estilos originales
         const originalStyles = {
             height: submenuCategorias.style.height,
             padding: submenuCategorias.style.padding,
@@ -65,7 +69,6 @@ function initSidebar() {
             position: submenuCategorias.style.position
         };
         
-        // Forzar temporalmente para medir
         submenuCategorias.style.height = 'auto';
         submenuCategorias.style.padding = '0.2rem 0';
         submenuCategorias.style.display = 'block';
@@ -74,7 +77,6 @@ function initSidebar() {
         
         const realHeight = submenuCategorias.scrollHeight;
         
-        // Restaurar estilos
         submenuCategorias.style.height = originalStyles.height;
         submenuCategorias.style.padding = originalStyles.padding;
         submenuCategorias.style.display = originalStyles.display;
@@ -84,10 +86,8 @@ function initSidebar() {
         return realHeight;
     }
     
-    // ========== FUNCIÓN PARA ABRIR SUBMENÚ EN MODO ACORDEÓN (cuando sidebar está expandido) ==========
     function openAccordionSubmenu() {
         if (!submenuCategorias) return;
-        // Limpiar cualquier estilo flotante previo
         submenuCategorias.style.cssText = '';
         submenuCategorias.classList.remove('floating-submenu');
         submenuCategorias.style.position = 'relative';
@@ -103,7 +103,6 @@ function initSidebar() {
         isCategoriasOpen = true;
     }
     
-    // ========== FUNCIÓN PARA CERRAR SUBMENÚ EN MODO ACORDEÓN ==========
     function closeAccordionSubmenu() {
         if (!submenuCategorias) return;
         submenuCategorias.style.height = '0';
@@ -115,7 +114,6 @@ function initSidebar() {
         isCategoriasOpen = false;
     }
     
-    // ========== FUNCIÓN PARA CERRAR SUBMENÚ FLOTANTE ==========
     function closeFloatingSubmenu() {
         if (submenuCategorias) {
             submenuCategorias.classList.remove('floating-submenu');
@@ -130,7 +128,6 @@ function initSidebar() {
         isCategoriasOpen = false;
     }
     
-    // ========== FUNCIÓN PARA ABRIR SUBMENÚ FLOTANTE (USANDO rem COMO EL TEMPLATE) ==========
     function openFloatingSubmenu() {
         if (!submenuCategorias) return;
         
@@ -140,16 +137,13 @@ function initSidebar() {
         }
         if (tooltipTimeout) clearTimeout(tooltipTimeout);
         
-        // Limpiar estilos previos
         submenuCategorias.style.cssText = '';
         submenuCategorias.classList.remove('floating-submenu');
         
-        // Asegurar que el menu-item sea el contenedor de referencia
         if (categoriasMenuItem) {
             categoriasMenuItem.style.position = 'relative';
         }
         
-        // Aplicar estilos flotantes - USANDO rem (como el template)
         submenuCategorias.style.position = 'absolute';
         submenuCategorias.style.left = '5rem';
         submenuCategorias.style.top = '7.8rem';
@@ -174,7 +168,6 @@ function initSidebar() {
         }
         isCategoriasOpen = true;
         
-        // Cerrar al hacer clic fuera
         const closeHandler = (event) => {
             if (categoriasBtn && !categoriasBtn.contains(event.target) && 
                 submenuCategorias && !submenuCategorias.contains(event.target)) {
@@ -190,7 +183,6 @@ function initSidebar() {
         }, 10);
     }
     
-    // ========== APLICAR ESTADO INICIAL ==========
     function applyInitialState() {
         if (isMobile()) {
             sidebar.classList.remove('minimize');
@@ -203,7 +195,6 @@ function initSidebar() {
             closeFloatingSubmenu();
             closeAccordionSubmenu();
             isCategoriasOpen = false;
-            // Resetear posición del menu-item
             if (categoriasMenuItem) {
                 categoriasMenuItem.style.position = '';
             }
@@ -213,7 +204,6 @@ function initSidebar() {
     applyInitialState();
     updateActiveMenuItem();
     
-    // ========== TOGGLE DEL MENÚ ==========
     if (menuToggleBtn) {
         menuToggleBtn.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -224,24 +214,17 @@ function initSidebar() {
                 closeAccordionSubmenu();
             } else {
                 if (sidebar.classList.contains('minimize')) {
-                    // Expandir menú
                     sidebar.classList.remove('minimize');
-                    // Resetear posición del menu-item
                     if (categoriasMenuItem) {
                         categoriasMenuItem.style.position = '';
                     }
                     if (isCategoriasOpen) {
-                        setTimeout(() => {
-                            openAccordionSubmenu();
-                        }, 50);
+                        setTimeout(() => { openAccordionSubmenu(); }, 50);
                     }
                 } else {
-                    // Minimizar menú
                     sidebar.classList.add('minimize');
                     if (isCategoriasOpen) {
-                        setTimeout(() => {
-                            openFloatingSubmenu();
-                        }, 50);
+                        setTimeout(() => { openFloatingSubmenu(); }, 50);
                     } else {
                         closeFloatingSubmenu();
                         closeAccordionSubmenu();
@@ -257,9 +240,7 @@ function initSidebar() {
         });
     }
     
-    // ========== COMPORTAMIENTO DE CATEGORÍAS ==========
     if (categoriasBtn && submenuCategorias && categoriasMenuItem) {
-        
         categoriasBtn.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -280,7 +261,6 @@ function initSidebar() {
                 return;
             }
             
-            // DESKTOP - MENÚ EXPANDIDO: acordeón normal
             if (!sidebar.classList.contains('minimize')) {
                 if (!isCategoriasOpen) {
                     openAccordionSubmenu();
@@ -290,7 +270,6 @@ function initSidebar() {
                 return;
             }
             
-            // DESKTOP - MENÚ CONTRADO: submenú flotante
             if (sidebar.classList.contains('minimize')) {
                 if (!isCategoriasOpen) {
                     openFloatingSubmenu();
@@ -301,7 +280,6 @@ function initSidebar() {
         });
     }
     
-    // ========== TOOLTIPS PARA MENÚ CONTRADO ==========
     function showTooltip(element, text) {
         if (isMobile()) return;
         if (!sidebar.classList.contains('minimize')) return;
@@ -367,7 +345,6 @@ function initSidebar() {
         });
     });
     
-    // ========== ENLACES DEL SUBMENÚ ==========
     const subMenuLinks = document.querySelectorAll('.sub-menu-link');
     subMenuLinks.forEach(link => {
         link.removeEventListener('click', handleSubmenuClick);
@@ -388,7 +365,6 @@ function initSidebar() {
         }
     }
     
-    // ========== ENLACES DEL MENÚ PRINCIPAL ==========
     const mainMenuLinks = document.querySelectorAll('.menu-link:not(#categoriasBtn)');
     mainMenuLinks.forEach(link => {
         link.removeEventListener('click', handleMainLinkClick);
@@ -414,7 +390,6 @@ function initSidebar() {
         }
     }
     
-    // ========== REDIMENSIONAMIENTO ==========
     let resizeTimeout;
     window.addEventListener('resize', () => {
         clearTimeout(resizeTimeout);
@@ -427,9 +402,7 @@ function initSidebar() {
             } else {
                 sidebar.classList.add('minimize');
                 if (isCategoriasOpen) {
-                    setTimeout(() => {
-                        openFloatingSubmenu();
-                    }, 50);
+                    setTimeout(() => { openFloatingSubmenu(); }, 50);
                 } else {
                     closeFloatingSubmenu();
                     closeAccordionSubmenu();
@@ -445,7 +418,6 @@ function initSidebar() {
     });
 }
 
-// ==================== ACTUALIZAR PÁGINA ACTIVA EN EL MENÚ ====================
 function updateActiveMenuItem() {
     const currentPath = window.location.pathname.split('/').pop() || 'inicio.html';
     const menuItems = document.querySelectorAll('.menu-item');
@@ -512,31 +484,44 @@ function applyTheme() {
     }
 }
 
-// Inicializar sistema de notificaciones
-if (typeof initNotificationsSystem === 'function') {
-    initNotificationsSystem();
+// ==================== COLOR PRIMARIO DEL USUARIO ====================
+function lightenColor(color, percent) {
+    if (color && color.startsWith('#')) {
+        const r = parseInt(color.slice(1, 3), 16);
+        const g = parseInt(color.slice(3, 5), 16);
+        const b = parseInt(color.slice(5, 7), 16);
+        const newR = Math.min(255, r + Math.floor(r * percent / 100));
+        const newG = Math.min(255, g + Math.floor(g * percent / 100));
+        const newB = Math.min(255, b + Math.floor(b * percent / 100));
+        return `rgb(${newR}, ${newG}, ${newB})`;
+    }
+    return color;
 }
 
-// Configurar el botón de notificaciones
-const notifBtn = document.getElementById('notificationsBtn');
-if (notifBtn && typeof toggleNotificationsPanel === 'function') {
-    notifBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        toggleNotificationsPanel();
-    });
+function aplicarColorPrimarioUsuario() {
+    const usuario = getUsuarioActual();
+    let color = "#025a8a";
+    
+    if (usuario && usuario.colorPrimario) {
+        color = usuario.colorPrimario;
+    } else {
+        const globalColor = localStorage.getItem('colorPrimario');
+        if (globalColor) color = globalColor;
+    }
+    
+    document.documentElement.style.setProperty('--color-primary', color);
+    const hoverColor = lightenColor(color, 10);
+    document.documentElement.style.setProperty('--color-primary-hover', hoverColor);
+    localStorage.setItem('colorPrimario', color);
 }
 
-// ==================== AVATAR CON SUBMENÚ (como categorías) ====================
+// ==================== AVATAR CON SUBMENÚ ====================
 function initAvatar() {
     const avatarDiv = document.getElementById('avatarUsuario');
     const menuPromocion = document.getElementById('menuPromocion');
     
     if (!avatarDiv) return;
     
-    let activeTooltip = null;
-    let tooltipTimeout = null;
-    
-    // Crear submenú flotante para el avatar (solo en escritorio)
     let avatarSubmenu = null;
     
     function crearSubmenuAvatar() {
@@ -566,7 +551,6 @@ function initAvatar() {
         `;
         document.body.appendChild(avatarSubmenu);
         
-        // Estilos dinámicos
         const style = document.createElement('style');
         style.textContent = `
             .avatar-submenu-item {
@@ -599,6 +583,7 @@ function initAvatar() {
     
     function updateAvatar() {
         const usuario = getUsuarioActual();
+        
         if (usuario && usuario.nombre) {
             avatarDiv.innerHTML = usuario.nombre.charAt(0).toUpperCase();
             avatarDiv.style.backgroundColor = usuario.avatarColor || '#2ecc71';
@@ -616,13 +601,13 @@ function initAvatar() {
             avatarDiv.title = usuario.nombre;
             
             if (menuPromocion) {
-                menuPromocion.style.display = usuario.rol === 'organizador' ? 'block' : 'none';
+                menuPromocion.style.display = esAdministrador(usuario) ? 'block' : 'none';
             }
         } else {
             avatarDiv.innerHTML = 'Iniciar sesión';
             avatarDiv.style.backgroundColor = 'transparent';
-            avatarDiv.style.color = 'rgb(2, 90, 138)';
-            avatarDiv.style.border = '2px solid rgb(2, 90, 138)';
+            avatarDiv.style.color = 'var(--color-primary)';
+            avatarDiv.style.border = '2px solid var(--color-primary)';
             avatarDiv.style.borderRadius = '30px';
             avatarDiv.style.fontSize = '0.8rem';
             avatarDiv.style.fontWeight = '600';
@@ -682,11 +667,6 @@ function initAvatar() {
     updateAvatar();
 }
 
-// Función isMobile (si no existe)
-function isMobile() {
-    return window.innerWidth <= 700;
-}
-
 // ==================== BÚSQUEDA GLOBAL ====================
 function initSearch() {
     const buscador = document.getElementById('buscador-global');
@@ -715,12 +695,12 @@ function initNotifications() {
     const notifBtn = document.getElementById('notificationsBtn');
     if (notifBtn) {
         notifBtn.addEventListener('click', () => {
-            alert('📢 Notificaciones: Próximamente podrás recibir alertas de tus eventos favoritos.');
+            alert('📢 Notificaciones: Próximamente podrás recibir alertas.');
         });
     }
 }
 
-// ==================== CONFIGURAR ENLACES DE CATEGORÍAS ====================
+// ==================== CONFIGURAR ENLACES ====================
 function setupCategoriaLinks() {
     const subMenuLinks = document.querySelectorAll('.sub-menu-link');
     subMenuLinks.forEach(link => {
@@ -740,6 +720,7 @@ function setupCategoriaLinks() {
 // ==================== INICIALIZACIÓN GENERAL ====================
 document.addEventListener('DOMContentLoaded', () => {
     applyTheme();
+    aplicarColorPrimarioUsuario();
     initSidebar();
     initAvatar();
     initSearch();
@@ -752,6 +733,7 @@ document.addEventListener('DOMContentLoaded', () => {
             isDarkMode = !isDarkMode;
             localStorage.setItem('darkMode', isDarkMode);
             applyTheme();
+            aplicarColorPrimarioUsuario();
         });
     }
 });

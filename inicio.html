@@ -140,7 +140,7 @@
                     <li><a href="inicio.html">Inicio</a></li>
                     <li><a href="calendario.html">Calendario</a></li>
                     <li><a href="mapa.html">Mapa</a></li>
-
+                    <li id="footerPromocionLink" style="display: none;"><a href="promocion.html">Promocionar</a></li>
                 </ul>
             </div>
 
@@ -177,6 +177,20 @@
     <script src="notifications.js"></script>
     <script src="script.js"></script>
     <script>
+        // Verificar sesión al cargar la página
+        const usuarioLogueado = getUsuarioActual();
+        console.log("🔍 Usuario logueado:", usuarioLogueado);
+
+        if (!usuarioLogueado) {
+            console.log("⚠️ No hay sesión activa");
+        } else {
+            console.log("✅ Bienvenido:", usuarioLogueado.nombre);
+        }
+        // Aplicar color primario del usuario logueado (si existe)
+        if (typeof aplicarColorPrimarioUsuario === 'function') {
+            aplicarColorPrimarioUsuario();
+        }
+
         // ==================== FUNCIÓN PARA OBTENER PREFERENCIAS ====================
         function getPreferenciasUsuarioLocal() {
             const usuario = getUsuarioActual();
@@ -269,6 +283,13 @@
             container.innerHTML = html;
         }
         
+        // Mostrar enlace de promocionar en footer solo para administradores
+        const usuarioFooter = getUsuarioActual();
+        if (usuarioFooter && esAdministrador(usuarioFooter)) {
+            const footerPromo = document.getElementById('footerPromocionLink');
+            if (footerPromo) footerPromo.style.display = 'list-item';
+        }
+
         // Inicializar
         renderizarInicio();
     </script>

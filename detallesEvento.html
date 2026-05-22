@@ -91,6 +91,11 @@
         <div style="margin-top: 2rem;">
             <a href="javascript:history.back()" class="btn-volver">← Volver atrás</a>
         </div>
+        <div id="recordatorio-container" style="margin-top: 1rem; text-align: center; display: none;">
+            <button id="btn-recordar-evento" class="btn-primary" style="background: #f39c12;">
+                🔔 Notificarme este evento
+            </button>
+        </div>
     </div>
 
     <footer class="footer">
@@ -153,6 +158,10 @@
     <script>
         // ==================== INICIALIZACIÓN ESPECÍFICA ====================
         let isDarkModeDetalle = localStorage.getItem('darkMode') === 'true';
+        // Aplicar color primario del usuario logueado (si existe)
+        if (typeof aplicarColorPrimarioUsuario === 'function') {
+            aplicarColorPrimarioUsuario();
+        }
         
         function formatDate(fechaStr) {
             return new Date(fechaStr).toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
@@ -208,26 +217,26 @@
                         <span class="categoria-badge">${evento.categoria}</span>
                         <h1>${evento.nombre}</h1>
                         <div class="detalle-fechas">
-                            <p> 📅 ${formatDate(evento.fechaInicio)} ${evento.horaInicio ? '· ' + evento.horaInicio : ''}</p>
-                            ${evento.fechaFin && evento.fechaFin !== evento.fechaInicio ? `<p>📅 Hasta: ${formatDate(evento.fechaFin)} ${evento.horaFin ? '· ' + evento.horaFin : ''}</p>` : ''}
+                            <p>${formatDate(evento.fechaInicio)} ${evento.horaInicio ? '· ' + evento.horaInicio : ''}</p>
+                            ${evento.fechaFin && evento.fechaFin !== evento.fechaInicio ? `<p>Hasta: ${formatDate(evento.fechaFin)} ${evento.horaFin ? '· ' + evento.horaFin : ''}</p>` : ''}
                         </div>
-                        <div class="detalle-precio">💰 Precio: ${evento.precio === 0 ? 'Gratis' : `$${evento.precio} CUP`}</div>
+                        <div class="detalle-precio">Precio: ${evento.precio === 0 ? 'Gratis' : `$${evento.precio} CUP`}</div>
                         <div class="detalle-ubicacion">
-                            <p><strong>📍 Ubicación:</strong> ${evento.ubicacion || evento.direccion || 'No especificada'}</p>
-                            <p><strong>🏢 Sede:</strong> ${evento.sede || 'No especificada'}</p>
-                            <p><strong>🏙️ Municipio:</strong> ${evento.municipio || 'No especificado'}</p>
+                            <p><strong>Ubicación:</strong> ${evento.ubicacion || evento.direccion || 'No especificada'}</p>
+                            <p><strong>Sede:</strong> ${evento.sede || 'No especificada'}</p>
+                            <p><strong>Municipio:</strong> ${evento.municipio || 'No especificado'}</p>
                         </div>
                         <div class="detalle-descripcion">
-                            <h3>📖 Descripción</h3>
+                            <h3>Descripción</h3>
                             <p>${evento.descripcion || 'Sin descripción disponible'}</p>
                         </div>
                         <div class="detalle-caracteristicas">
-                            <span class="caracteristica ${menores.clase}" style="background: transparent; border: 1px solid currentColor;">${menores.texto}</span>
-                            <span class="caracteristica ${aire.clase}" style="background: transparent; border: 1px solid currentColor;">${aire.texto}</span>
-                            ${evento.posibilidadReserva ? '<span class="caracteristica">📞 Posibilidad de reserva</span>' : ''}
+                            <span class="caracteristica ${menores.clase}">${menores.texto}</span>
+                            <span class="caracteristica ${aire.clase}">${aire.texto}</span>
+                            ${evento.posibilidadReserva ? '<span class="caracteristica">Posibilidad de reserva</span>' : ''}
                         </div>
                         <div class="detalle-contacto">
-                            <h3>📞 Contacto</h3>
+                            <h3>Contacto</h3>
                             <p><strong>Organizador:</strong> ${evento.organizador || 'No especificado'}</p>
                             <p><strong>Teléfono:</strong> ${evento.telefono || 'No disponible'}</p>
                             ${evento.contactoReserva ? `<p><strong>Reservas:</strong> ${evento.contactoReserva}</p>` : ''}
@@ -235,7 +244,7 @@
                     </div>
                 </div>
                 <div class="mapa-container">
-                    <h3>🗺️ Mapa</h3>
+                    <h3>Mapa</h3>
                     <div id="mapa-detalle" style="height: 350px; width: 100%; border-radius: 16px;"></div>
                 </div>
             `;
@@ -268,6 +277,212 @@
             localStorage.setItem('darkMode', isDarkModeDetalle);
             applyThemeDetalle();
         });
+
+        // Verificar si el usuario es administrador y mostrar botones de edición
+        // Verificar si el usuario es administrador
+        const usuario = getUsuarioActual();
+        const esAdmin = usuario && esAdministrador(usuario);
+
+        if (esAdmin) {
+            // Agregar botones de acción
+            const accionesDiv = document.createElement('div');
+            accionesDiv.className = 'acciones-admin';
+            accionesDiv.innerHTML = `
+                <button id="editarEventoBtn" class="btn-admin-editar">Editar evento</button>
+                <button id="eliminarEventoBtn" class="btn-admin-eliminar">Eliminar evento</button>
+            `;
+            
+            // Insertar después de la información del evento
+            document.querySelector('.detalle-info').appendChild(accionesDiv);
+            
+            // Evento eliminar
+            document.getElementById('eliminarEventoBtn').addEventListener('click', () => {
+                if (confirm(`¿Eliminar "${evento.nombre}"?`)) {
+                    eliminarEvento(evento.id);
+                    alert('Evento eliminado');
+                    window.location.href = 'inicio.html';
+                }
+            });
+            
+            // Evento editar (similar a lo que ya vimos)
+            document.getElementById('editarEventoBtn').addEventListener('click', () => {
+                abrirModalEdicion(evento);
+            });
+        }
+
+        // ==================== FUNCIÓN PARA EDITAR EVENTO (MODAL) ====================
+        function abrirModalEdicion(evento) {
+            // Crear modal
+            const modal = document.createElement('div');
+            modal.className = 'modal-edicion';
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.8);
+                z-index: 10000;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                overflow-y: auto;
+            `;
+            
+            modal.innerHTML = `
+                <div class="modal-edicion-content" style="background: var(--color-surface); border-radius: 24px; padding: 2rem; max-width: 600px; width: 90%; max-height: 90vh; overflow-y: auto;">
+                    <h2>Editar evento</h2>
+                    <form id="form-editar-evento">
+                        <div class="form-group">
+                            <label>Nombre del evento</label>
+                            <input type="text" id="edit-nombre" value="${escapeHtml(evento.nombre)}" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Categoría</label>
+                            <select id="edit-categoria">
+                                <option ${evento.categoria === 'Conciertos' ? 'selected' : ''}>Conciertos</option>
+                                <option ${evento.categoria === 'Teatro' ? 'selected' : ''}>Teatro</option>
+                                <option ${evento.categoria === 'Cine' ? 'selected' : ''}>Cine</option>
+                                <option ${evento.categoria === 'Exposiciones' ? 'selected' : ''}>Exposiciones</option>
+                                <option ${evento.categoria === 'Danza' ? 'selected' : ''}>Danza</option>
+                                <option ${evento.categoria === 'Libros' ? 'selected' : ''}>Libros</option>
+                                <option ${evento.categoria === 'Festival' ? 'selected' : ''}>Festival</option>
+                                <option ${evento.categoria === 'Infantiles' ? 'selected' : ''}>Infantiles</option>
+                                <option ${evento.categoria === 'Deportes' ? 'selected' : ''}>Deportes</option>
+                                <option ${evento.categoria === 'Talleres' ? 'selected' : ''}>Talleres</option>
+                                <option ${evento.categoria === 'Museos' ? 'selected' : ''}>Museos</option>
+                                <option ${evento.categoria === 'Ferias' ? 'selected' : ''}>Ferias</option>
+                                <option ${evento.categoria === 'Farándula' ? 'selected' : ''}>Farándula</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Descripción</label>
+                            <textarea id="edit-descripcion" rows="3">${escapeHtml(evento.descripcion || '')}</textarea>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group"><label>Fecha inicio</label><input type="date" id="edit-fechaInicio" value="${evento.fechaInicio}" required></div>
+                            <div class="form-group"><label>Hora inicio</label><input type="time" id="edit-horaInicio" value="${evento.horaInicio || ''}"></div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group"><label>Fecha fin</label><input type="date" id="edit-fechaFin" value="${evento.fechaFin || evento.fechaInicio}"></div>
+                            <div class="form-group"><label>Hora fin</label><input type="time" id="edit-horaFin" value="${evento.horaFin || ''}"></div>
+                        </div>
+                        <div class="form-group">
+                            <label>Precio (CUP)</label>
+                            <input type="number" id="edit-precio" value="${evento.precio}" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label>Ubicación</label>
+                            <input type="text" id="edit-ubicacion" value="${escapeHtml(evento.ubicacion || '')}" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Sede</label>
+                            <input type="text" id="edit-sede" value="${escapeHtml(evento.sede || '')}">
+                        </div>
+                        <div class="form-group">
+                            <label>Municipio</label>
+                            <input type="text" id="edit-municipio" value="${escapeHtml(evento.municipio || '')}">
+                        </div>
+                        <div class="form-group">
+                            <label>Poster (URL)</label>
+                            <input type="url" id="edit-poster" value="${evento.poster || ''}">
+                        </div>
+                        <div class="form-checkboxes">
+                            <label><input type="checkbox" id="edit-aptoMenores" ${evento.aptoMenores ? 'checked' : ''}> Apto para menores</label>
+                            <label><input type="checkbox" id="edit-aireLibre" ${evento.aireLibre ? 'checked' : ''}> Al aire libre</label>
+                            <label><input type="checkbox" id="edit-posibilidadReserva" ${evento.posibilidadReserva ? 'checked' : ''}> Posibilidad de reserva</label>
+                        </div>
+                        <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                            <button type="submit" class="btn-guardar" style="background: var(--color-primary, rgb(2,90,138)); color: white; padding: 0.8rem 1.5rem; border: none; border-radius: 30px; cursor: pointer;">💾 Guardar cambios</button>
+                            <button type="button" id="cancelarEdicion" class="btn-cancelar" style="background: var(--color-border); padding: 0.8rem 1.5rem; border: none; border-radius: 30px; cursor: pointer;">❌ Cancelar</button>
+                        </div>
+                    </form>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            // Manejar submit del formulario
+            modal.querySelector('#form-editar-evento').addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                const datosActualizados = {
+                    nombre: modal.querySelector('#edit-nombre').value,
+                    categoria: modal.querySelector('#edit-categoria').value,
+                    descripcion: modal.querySelector('#edit-descripcion').value,
+                    fechaInicio: modal.querySelector('#edit-fechaInicio').value,
+                    fechaFin: modal.querySelector('#edit-fechaFin').value || modal.querySelector('#edit-fechaInicio').value,
+                    horaInicio: modal.querySelector('#edit-horaInicio').value,
+                    horaFin: modal.querySelector('#edit-horaFin').value,
+                    precio: parseFloat(modal.querySelector('#edit-precio').value) || 0,
+                    ubicacion: modal.querySelector('#edit-ubicacion').value,
+                    sede: modal.querySelector('#edit-sede').value,
+                    municipio: modal.querySelector('#edit-municipio').value,
+                    poster: modal.querySelector('#edit-poster').value,
+                    aptoMenores: modal.querySelector('#edit-aptoMenores').checked,
+                    aireLibre: modal.querySelector('#edit-aireLibre').checked,
+                    posibilidadReserva: modal.querySelector('#edit-posibilidadReserva').checked
+                };
+                
+                if (actualizarEvento(evento.id, datosActualizados)) {
+                    alert('Evento actualizado correctamente');
+                    window.location.reload();
+                } else {
+                    alert('Error al actualizar el evento');
+                }
+            });
+            
+            modal.querySelector('#cancelarEdicion').addEventListener('click', () => {
+                modal.remove();
+            });
+        }
+
+        // Función auxiliar para escapar HTML
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>]/g, function(m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                return m;
+            });
+        }
+
+        // ==================== BOTÓN DE RECORDATORIO ====================
+        const usuarioRecordatorio = getUsuarioActual();
+        const recordatorioContainer = document.getElementById('recordatorio-container');
+        const btnRecordar = document.getElementById('btn-recordar-evento');
+
+        if (usuarioRecordatorio && evento) {
+            recordatorioContainer.style.display = 'block';
+            
+            // Verificar si ya es recordatorio
+            if (esRecordatorio(usuarioRecordatorio.id, evento.id)) {
+                btnRecordar.textContent = '✅ Evento recordado';
+                btnRecordar.style.background = '#27ae60';
+                btnRecordar.disabled = true;
+            } else {
+                btnRecordar.textContent = '🔔 Recordarme este evento';
+                btnRecordar.style.background = '#f39c12';
+                btnRecordar.disabled = false;
+            }
+            
+            btnRecordar.addEventListener('click', () => {
+                if (agregarRecordatorio(usuarioRecordatorio.id, evento.id)) {
+                    btnRecordar.textContent = '✅ Evento recordado';
+                    btnRecordar.style.background = '#27ae60';
+                    btnRecordar.disabled = true;
+                    
+                    // Solicitar permiso de notificaciones si es la primera vez
+                    if (typeof solicitarPermisoNotificaciones === 'function') {
+                        solicitarPermisoNotificaciones();
+                    }
+                    alert('Te notificaremos antes de este evento según tus preferencias.');
+                } else {
+                    alert('Error al guardar el recordatorio.');
+                }
+            });
+        }
     </script>
 </body>
 </html>

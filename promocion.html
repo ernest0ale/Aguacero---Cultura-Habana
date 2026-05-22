@@ -261,6 +261,106 @@
     <script src="notifications.js"></script>
     <script src="script.js"></script>
     <script>
+        // ==================== VERIFICAR ACCESO (SOLO ADMINISTRADORES) ====================
+        const usuarioPromo = getUsuarioActual();
+        const accesoDenegado = document.getElementById('acceso-denegado');
+        const formularioContainer = document.getElementById('formulario-container');
+        const menuPromocion = document.getElementById('menuPromocion');
+
+        // VERIFICACIÓN CORREGIDA: Usar esAdministrador
+        if (usuarioPromo && esAdministrador(usuarioPromo)) {
+            accesoDenegado.style.display = 'none';
+            formularioContainer.style.display = 'block';
+            if (menuPromocion) menuPromocion.style.display = 'block';
+        } else {
+            accesoDenegado.style.display = 'block';
+            formularioContainer.style.display = 'none';
+        }
+
+        // Aplicar color primario
+        if (typeof aplicarColorPrimarioUsuario === 'function') {
+            aplicarColorPrimarioUsuario();
+        }
+        // Verificar si es una edición
+        const urlParams = new URLSearchParams(window.location.search);
+        const eventoIdEditar = urlParams.get('editar');
+        const eventoAEditar = eventoIdEditar ? getEventoById(eventoIdEditar) : JSON.parse(localStorage.getItem('eventoAEditar'));
+
+        if (eventoAEditar) {
+            console.log("Editando evento:", eventoAEditar.nombre);
+            // Limpiar temporal
+            localStorage.removeItem('eventoAEditar');
+            
+            // Rellenar formulario con datos del evento
+            setTimeout(() => {
+                document.getElementById('nombre').value = eventoAEditar.nombre || '';
+                document.getElementById('categoria').value = eventoAEditar.categoria || '';
+                document.getElementById('poster').value = eventoAEditar.poster || '';
+                document.getElementById('descripcion').value = eventoAEditar.descripcion || '';
+                document.getElementById('fechaInicio').value = eventoAEditar.fechaInicio || '';
+                document.getElementById('fechaFin').value = eventoAEditar.fechaFin || '';
+                document.getElementById('horaInicio').value = eventoAEditar.horaInicio || '';
+                document.getElementById('horaFin').value = eventoAEditar.horaFin || '';
+                document.getElementById('precio').value = eventoAEditar.precio || 0;
+                document.getElementById('municipio').value = eventoAEditar.municipio || '';
+                document.getElementById('sede').value = eventoAEditar.sede || '';
+                document.getElementById('direccion').value = eventoAEditar.direccion || '';
+                document.getElementById('organizador').value = eventoAEditar.organizador || '';
+                document.getElementById('telefono').value = eventoAEditar.telefono || '';
+                document.getElementById('aptoMenores').checked = eventoAEditar.aptoMenores || false;
+                document.getElementById('aireLibre').checked = eventoAEditar.aireLibre || false;
+                document.getElementById('posibilidadReserva').checked = eventoAEditar.posibilidadReserva || false;
+                document.getElementById('lat').value = eventoAEditar.lat || 23.1136;
+                document.getElementById('lng').value = eventoAEditar.lng || -82.3666;
+                
+                // Cambiar texto del botón
+                const submitBtn = document.getElementById('submitBtn');
+                if (submitBtn) submitBtn.textContent = 'Actualizar evento';
+            }, 100);
+        }
+
+        // Modificar el envío del formulario para actualizar en lugar de crear
+        const formEvento = document.getElementById('form-evento');
+        if (formEvento) {
+            const originalSubmit = formEvento.onsubmit;
+            formEvento.addEventListener('submit', (e) => {
+                if (eventoAEditar) {
+                    e.preventDefault();
+                    // Actualizar evento existente
+                    const datosActualizados = {
+                        nombre: document.getElementById('nombre').value,
+                        categoria: document.getElementById('categoria').value,
+                        poster: document.getElementById('poster').value || 'https://picsum.photos/id/100/400/300',
+                        descripcion: document.getElementById('descripcion').value,
+                        fechaInicio: document.getElementById('fechaInicio').value,
+                        fechaFin: document.getElementById('fechaFin').value || document.getElementById('fechaInicio').value,
+                        horaInicio: document.getElementById('horaInicio').value,
+                        horaFin: document.getElementById('horaFin').value,
+                        precio: parseFloat(document.getElementById('precio').value) || 0,
+                        aptoMenores: document.getElementById('aptoMenores').checked,
+                        aireLibre: document.getElementById('aireLibre').checked,
+                        posibilidadReserva: document.getElementById('posibilidadReserva').checked,
+                        municipio: document.getElementById('municipio').value,
+                        sede: document.getElementById('sede').value,
+                        direccion: document.getElementById('direccion').value,
+                        ubicacion: document.getElementById('direccion').value,
+                        lat: parseFloat(document.getElementById('lat').value),
+                        lng: parseFloat(document.getElementById('lng').value),
+                        organizador: document.getElementById('organizador').value,
+                        telefono: document.getElementById('telefono').value,
+                        contactoReserva: document.getElementById('contactoReserva').value
+                    };
+                    
+                    if (actualizarEvento(eventoAEditar.id, datosActualizados)) {
+                        alert('Evento actualizado correctamente');
+                        window.location.href = 'inicio.html';
+                    } else {
+                        alert('Error al actualizar el evento');
+                    }
+                }
+            });
+        }
+
         // Función para los botones + y -
         function changeNumber(inputId, delta) {
             const input = document.getElementById(inputId);
@@ -278,25 +378,9 @@
         const avatarDiv = document.getElementById('avatarUsuario');
         const buscadorGlobal = document.getElementById('buscador-global');
         const searchBtn = document.getElementById('searchBtn');
-        const menuPromocion = document.getElementById('menuPromocion');
         
         let isDarkMode = localStorage.getItem('darkMode') === 'true';
         let map, marker;
-        
-        // Verificar acceso
-        const usuario = getUsuarioActual();
-        const accesoDenegado = document.getElementById('acceso-denegado');
-        const formularioContainer = document.getElementById('formulario-container');
-
-        // Usar la función esAdministrador de data.js
-        if (usuario && esAdministrador(usuario)) {
-            accesoDenegado.style.display = 'none';
-            formularioContainer.style.display = 'block';
-            if (menuPromocion) menuPromocion.style.display = 'block';
-        } else {
-            accesoDenegado.style.display = 'block';
-            formularioContainer.style.display = 'none';
-        }
         
         // ==================== Tema Oscuro ====================
         function applyTheme() {
@@ -410,16 +494,6 @@
         buscadorGlobal.addEventListener('keypress', (e) => { if (e.key === 'Enter') realizarBusqueda(); });
         if (searchBtn) searchBtn.addEventListener('click', realizarBusqueda);
         
-        // ==================== Verificar Acceso ====================
-        if (usuario && usuario.rol === 'organizador') {
-            accesoDenegado.style.display = 'none';
-            formularioContainer.style.display = 'block';
-            if (menuPromocion) menuPromocion.style.display = 'block';
-        } else {
-            accesoDenegado.style.display = 'block';
-            formularioContainer.style.display = 'none';
-        }
-        
         // ==================== Wizard ====================
         let currentStep = 1;
         const stepContents = document.querySelectorAll('.step-content');
@@ -498,7 +572,7 @@
                 organizador: document.getElementById('organizador').value,
                 telefono: document.getElementById('telefono').value,
                 contactoReserva: document.getElementById('contactoReserva').value,
-                creadoPor: usuario.id
+                creadoPor: usuarioPromo.id // Usar usuarioPromo en lugar de usuario
             };
             
             agregarEvento(nuevoEvento);

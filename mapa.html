@@ -330,6 +330,10 @@
     <script>
         // ==================== Tema Oscuro ====================
         let isDarkMode = localStorage.getItem('darkMode') === 'true';
+        // Aplicar color primario del usuario logueado (si existe)
+        if (typeof aplicarColorPrimarioUsuario === 'function') {
+            aplicarColorPrimarioUsuario();
+        }
         
         // Función para obtener la URL del tile según el tema
         function getTileUrl() {

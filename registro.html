@@ -171,13 +171,14 @@
 <body>
     <div class="auth-container">
         <div class="auth-card" id="registro-card">
-            <h1>🎭 Cultura Habana</h1>
-            <p class="subtitle">Crea tu cuenta y disfruta de más funciones</p>
+            
             
             <div id="message"></div>
             
             <!-- Paso 1: Registro -->
             <div id="step-registro">
+                <h1>🎭 Cultura Habana</h1>
+                <p class="subtitle">Crea tu cuenta y disfruta de más funciones</p>
                 <form id="register-form">
                     <div class="form-group">
                         <label>Nombre completo *</label>
@@ -225,11 +226,11 @@
             
             <!-- Paso 2: Preferencias -->
             <div id="step-preferencias" style="display: none;">
-                <h2 style="text-align: center; margin-bottom: 0.5rem;">🎨 Elige tus preferencias</h2>
+                <h2 style="text-align: center; margin-bottom: 0.5rem;">Elige tus preferencias</h2>
                 <p style="text-align: center; color: var(--color-text-secondary); margin-bottom: 1rem;">Selecciona las categorías que más te interesan</p>
                 
                 <div style="text-align: center;">
-                    <span class="select-all-btn" id="selectAllBtn">✅ Seleccionar todas</span>
+                    <span class="select-all-btn" id="selectAllBtn">Seleccionar todas</span>
                 </div>
                 
                 <div id="preferences-grid" class="preferences-grid"></div>
@@ -289,20 +290,23 @@
         function renderizarPreferencias() {
             const container = document.getElementById('preferences-grid');
             container.innerHTML = categoriasConEmojis.map(cat => `
-                <div class="pref-card" data-categoria="${cat.nombre}">
+                <div class="pref-card" data-categoria="${cat.nombre}" style="cursor: pointer;">
                     <span class="pref-emoji">${cat.emoji}</span>
                     <span class="pref-name">${cat.nombre}</span>
                 </div>
             `).join('');
             
-            document.querySelectorAll('.pref-card').forEach(card => {
+            // Seleccionar todas por defecto
+            const cards = document.querySelectorAll('.pref-card');
+            cards.forEach(card => {
                 card.classList.add('selected');
-                card.addEventListener('click', () => {
+                card.addEventListener('click', (e) => {
+                    e.stopPropagation();
                     card.classList.toggle('selected');
                 });
             });
         }
-        
+
         function getSelectedPreferences() {
             const selected = [];
             document.querySelectorAll('.pref-card.selected').forEach(card => {
@@ -324,18 +328,42 @@
         });
         
         document.getElementById('savePreferencesBtn')?.addEventListener('click', () => {
-            const preferencias = getSelectedPreferences();
-            if (temporalUserData) {
-                temporalUserData.preferencias = preferencias;
-                const resultado = registrarUsuario(temporalUserData);
-                if (resultado.exito) {
-                    iniciarSesion(temporalUserData.email, temporalUserData.password);
+        const preferencias = getSelectedPreferences();
+        console.log("=========================================");
+        console.log("💾 Guardando preferencias:", preferencias);
+        
+        if (temporalUserData) {
+            temporalUserData.preferencias = preferencias;
+            console.log("📦 Registrando usuario:", temporalUserData);
+            
+            const resultado = registrarUsuario(temporalUserData);
+            console.log("📊 Resultado registro:", resultado);
+            
+            if (resultado.exito) {
+                console.log("✅ Usuario registrado. Intentando iniciar sesión...");
+                
+                // Intentar iniciar sesión con el nuevo usuario
+                const loginResult = iniciarSesion(temporalUserData.email, temporalUserData.password);
+                console.log("📊 Resultado login:", loginResult);
+                
+                if (loginResult.exito) {
+                    console.log("✅ Login exitoso, redirigiendo a inicio.html");
                     window.location.href = 'inicio.html';
                 } else {
-                    mostrarMensaje(resultado.mensaje, 'error');
+                    console.log("❌ Login falló:", loginResult.mensaje);
+                    mostrarMensaje("Error al iniciar sesión automáticamente. Por favor inicia sesión manualmente.", 'error');
+                    // Redirigir al login para que el usuario intente manualmente
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 2000);
                 }
+            } else {
+                console.log("❌ Registro falló:", resultado.mensaje);
+                mostrarMensaje(resultado.mensaje, 'error');
             }
-        });
+        }
+        console.log("=========================================");
+    });
         
         document.getElementById('register-form').addEventListener('submit', (e) => {
             e.preventDefault();
@@ -348,8 +376,8 @@
                 return;
             }
             
-            if (password.length < 4) {
-                mostrarMensaje('La contraseña debe tener al menos 4 caracteres', 'error');
+            if (password.length < 8) {
+                mostrarMensaje('La contraseña debe tener al menos 8 caracteres', 'error');
                 return;
             }
             
