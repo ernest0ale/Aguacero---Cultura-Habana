@@ -45,7 +45,7 @@
                     <span id="notifCounter" class="notif-counter" style="display: none;">0</span>
                 </button>
                 <div id="notificationsPanel" class="notifications-panel">
-                    <div class="notifications-header">📢 Notificaciones</div>
+                    <div class="notifications-header">Notificaciones</div>
                     <div class="notifications-list"></div>
                 </div>
             </div>
@@ -89,11 +89,11 @@
     <!-- Contenido principal -->
     <div class="main-content">
         <div id="acceso-denegado" style="display: none; text-align: center; padding: 3rem;">
-            <p>⚠️ Debes iniciar sesión como organizador para promocionar eventos.</p>
+            <p>Debe iniciar sesión como organizador para promocionar eventos.</p>
             <a href="login.html" class="btn-primary" style="display: inline-block; padding: 0.8rem 2rem; background: rgb(2,90,138); color: white; border-radius: 30px; text-decoration: none; margin-top: 1rem;">Iniciar sesión</a>
         </div>
         
-        <div id="formulario-container" style="display: none;">
+        <div id="formulario-container" style="display: block;">
             <h2>✨ Promociona tu evento</h2>
             
             <div class="wizard-container">
@@ -104,12 +104,13 @@
                 </div>
 
                 <form id="form-evento">
-                    <!-- Paso 1 -->
+                    <!-- PASO 1: Detalles -->
                     <div class="step-content step-1 active">
                         <div class="form-group">
                             <label>Nombre del evento *</label>
                             <input type="text" id="nombre" required>
                         </div>
+                        
                         <div class="form-group">
                             <label>Categoría *</label>
                             <select id="categoria" required>
@@ -121,38 +122,61 @@
                                 <option>Farándula</option><option>Otra</option>
                             </select>
                         </div>
+                        
                         <div class="form-group">
                             <label>Poster (URL de imagen)</label>
                             <input type="url" id="poster" placeholder="https://...">
                         </div>
+                        
                         <div class="form-group">
                             <label>Descripción</label>
                             <textarea id="descripcion" rows="3"></textarea>
                         </div>
+                        
+                        <!-- FILA: Fecha inicio + Hora inicio -->
                         <div class="form-row">
-                            <div class="form-group"><label>Fecha inicio *</label><input type="date" id="fechaInicio" required></div>
-                            <div class="form-group"><label>Hora inicio</label><input type="time" id="horaInicio"></div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group"><label>Fecha fin</label><input type="date" id="fechaFin"></div>
-                            <div class="form-group"><label>Hora fin</label><input type="time" id="horaFin"></div>
-                        </div>
-                        <div class="form-group">
-                            <label>Precio (CUP) - 0 si es gratis</label>
-                            <div class="number-input-container">
-                                <button type="button" class="number-btn minus" onclick="changeNumber('precio', -10)">-</button>
-                                <input type="number" id="precio" value="0" min="0" step="10">
-                                <button type="button" class="number-btn plus" onclick="changeNumber('precio', 10)">+</button>
+                            <div class="form-group">
+                                <label>Fecha inicio *</label>
+                                <input type="date" id="fechaInicio" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Hora inicio</label>
+                                <input type="time" id="horaInicio">
                             </div>
                         </div>
-                        <div class="form-group">
-                            <label>Máximo de invitados (opcional)</label>
-                            <div class="number-input-container">
-                                <button type="button" class="number-btn minus" onclick="changeNumber('maxInvitados', -10)">-</button>
-                                <input type="number" id="maxInvitados" value="0" min="0" step="10">
-                                <button type="button" class="number-btn plus" onclick="changeNumber('maxInvitados', 10)">+</button>
+                        
+                        <!-- FILA: Fecha fin + Hora fin -->
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Fecha fin</label>
+                                <input type="date" id="fechaFin">
+                            </div>
+                            <div class="form-group">
+                                <label>Hora fin</label>
+                                <input type="time" id="horaFin">
                             </div>
                         </div>
+                        
+                        <!-- FILA: Precio + Máximo invitados (uno al lado del otro) -->
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Precio (CUP) - 0 si es gratis</label>
+                                <div class="number-input-container">
+                                    <button type="button" class="number-btn minus" data-target="precio">-</button>
+                                    <input type="number" id="precio" value="0" min="0" step="10">
+                                    <button type="button" class="number-btn plus" data-target="precio">+</button>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Máximo de invitados (opcional)</label>
+                                <div class="number-input-container">
+                                    <button type="button" class="number-btn minus" data-target="maxInvitados">-</button>
+                                    <input type="number" id="maxInvitados" value="0" min="0" step="10">
+                                    <button type="button" class="number-btn plus" data-target="maxInvitados">+</button>
+                                </div>
+                            </div>
+                        </div>
+                        
                         <div class="form-checkboxes">
                             <label><input type="checkbox" id="aptoMenores"> Apto para menores</label>
                             <label><input type="checkbox" id="aireLibre"> Al aire libre</label>
@@ -160,9 +184,10 @@
                         </div>
                     </div>
 
-                    <!-- Paso 2 -->
+                    <!-- PASO 2: Ubicación -->
                     <div class="step-content step-2">
-                        <div class="form-group"><label>Municipio *</label>
+                        <div class="form-group">
+                            <label>Municipio *</label>
                             <select id="municipio" required>
                                 <option>Plaza de la Revolución</option><option>Centro Habana</option>
                                 <option>La Habana Vieja</option><option>Vedado</option>
@@ -171,19 +196,32 @@
                                 <option>Boyeros</option><option>Arroyo Naranjo</option><option>Cotorro</option>
                             </select>
                         </div>
-                        <div class="form-group"><label>Sede o lugar *</label><input type="text" id="sede" required></div>
-                        <div class="form-group"><label>Dirección *</label><input type="text" id="direccion" required></div>
-                        <div class="form-group"><label>Ubicación en mapa (haz clic)</label>
+                        <div class="form-group">
+                            <label>Sede o lugar *</label>
+                            <input type="text" id="sede" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Dirección *</label>
+                            <input type="text" id="direccion" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Ubicación en mapa (haz clic)</label>
                             <div id="mapa" style="height: 250px; border-radius: 12px;"></div>
                             <input type="hidden" id="lat" value="23.1136">
                             <input type="hidden" id="lng" value="-82.3666">
                         </div>
                     </div>
 
-                    <!-- Paso 3 -->
+                    <!-- PASO 3: Publicar -->
                     <div class="step-content step-3">
-                        <div class="form-group"><label>Nombre del organizador *</label><input type="text" id="organizador" required></div>
-                        <div class="form-group"><label>Teléfono de contacto *</label><input type="tel" id="telefono" required></div>
+                        <div class="form-group">
+                            <label>Nombre del organizador *</label>
+                            <input type="text" id="organizador" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Teléfono de contacto *</label>
+                            <input type="tel" id="telefono" maxlength="8" required>
+                        </div>
                         <div class="form-group">
                             <label>Contacto para reservas (opcional)</label>
                             <input type="text" id="contactoReserva" placeholder="WhatsApp, Telegram, etc.">
@@ -205,55 +243,62 @@
 
     <footer class="footer">
         <div class="footer-container">
-            <!-- Columna 1: Logo y descripción -->
-            <div class="footer-column">
-                <div class="footer-logo">
-                    <img src="resources/aguacero_cuba_logo_trasnparente.png" alt="Cultura Habana">
-                    <span>Cultura Habana</span>
+            <div class="footer-columns">
+                <!-- Columna 1: Logo + descripción -->
+                <div class="footer-col-1">
+                    <div class="footer-logo">
+                        <img src="resources/aguacero_cuba_darklogo_trasnparente.png" alt="Cultura Habana">
+                        <span>Cultura Habana</span>
+                    </div>
+                    <p class="footer-description">
+                        Los mejores planes en La Habana se encuentran bajo este Aguacero.
+                        <br><br>
+                        Deja la sombrilla en casa, ¡no te pierdas ni una gota de cultura!
+                    </p>
+                    <div class="footer-social">
+                        <a href="https://www.facebook.com/aguacerocuba" class="social-icon-link" target="_blank">
+                            <img src="resources/icons_light/facebook.png" alt="Facebook">
+                        </a>
+                        <a href="https://www.instagram.com/aguacero_cuba/" class="social-icon-link" target="_blank">
+                            <img src="resources/icons_light/instagram.png" alt="Instagram">
+                        </a>
+                        <a href="https://t.me/Aguacero" class="social-icon-link" target="_blank">
+                            <img src="resources/icons_light/telegram.png" alt="Telegram">
+                        </a>
+                        <a href="https://www.whatsapp.com/channel/0029VbApHoQKmCPX3VynJs2n" class="social-icon-link" target="_blank">
+                            <img src="resources/icons_light/whatsapp.png" alt="WhatsApp">
+                        </a>
+                    </div>
                 </div>
-                <p class="footer-description">
-                    Los mejores planes en La Habana se encuentran bajo este Aguacero.<br>
-                    Deja la sombrilla en casa, ¡no te pierdas ni una gota de cultura!
-                </p>
-            </div>
-
-            <!-- Columna 2: Enlaces rápidos -->
-            <div class="footer-column">
-                <h3>Explorar</h3>
-                <ul class="footer-links">
-                    <li><a href="inicio.html">Inicio</a></li>
-                    <li><a href="calendario.html">Calendario</a></li>
-                    <li><a href="mapa.html">Mapa</a></li>
-
-                </ul>
-            </div>
-
-            <!-- Columna 3: Soporte / Legal -->
-            <div class="footer-column">
-                <h3>Legal</h3>
-                <ul class="footer-links">
-                    <li><a href="#" id="faqLink">Preguntas frecuentes</a></li>
-                    <li><a href="#" id="termsLink">Términos y condiciones</a></li>
-                    <li><a href="#" id="privacyLink">Política de privacidad</a></li>
-                    <li><a href="mailto:contacto@culturahabana.com">contacto@culturahabana.com</a></li>
-                </ul>
-            </div>
-
-            <!-- Columna 4: Redes sociales -->
-            <div class="footer-column">
-                <h3>Síguenos</h3>
-                <div class="footer-social">
-                    <a href="https://www.facebook.com/aguacerocuba" class="social-icon" target="_blank">Facebook</a>
-                    <a href="https://www.instagram.com/aguacero_cuba/" class="social-icon" target="_blank">Instagram</a>
-                    <a href="https://www.whatsapp.com/channel/0029VbApHoQKmCPX3VynJs2n" class="social-icon" target="_blank">WhatsApp</a>
-                    <a href="https://t.me/Aguacero" class="social-icon" target="_blank">Telegram</a>
+                
+                <!-- Columna 2: Explorar -->
+                <div class="footer-col-2">
+                    <h3>EXPLORAR</h3>
+                    <ul class="footer-links">
+                        <li><a href="inicio.html">Inicio</a></li>
+                        <li><a href="calendario.html">Calendario</a></li>
+                        <li><a href="mapa.html">Mapa</a></li>
+                        <li id="footerPromocionLink" style="display: none;"><a href="promocion.html">Promocionar</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Columna 3: Contacto -->
+                <div class="footer-col-3">
+                    <h3>CONTACTO</h3>
+                    <div class="contact-item"><strong>Tel:</strong> <a href="tel:+5351234567">+53 5123 4567</a></div>
+                    <div class="contact-item"><strong>Co:</strong> <a href="mailto:contacto@culturahabana.com">contacto@culturahabana.com</a></div>
+                    <div class="contact-item"><strong>Ub:</strong> <span>La Habana, Cuba</span></div>
                 </div>
             </div>
-        </div>
-        
-        <div class="footer-bottom">
-            <p>&copy; 2025 Cultura Habana. Todos los derechos reservados.</p>
-            <p>Diseñado con ❤️ para La Habana</p>
+            
+            <div class="footer-bottom">
+                <p class="footer-copyright">&copy; 2025 Cultura Habana. Todos los derechos reservados.</p>
+                <div class="footer-legal">
+                    <a href="#">Política de privacidad</a>
+                    <a href="#">Términos de servicio</a>
+                    <a href="#">Política de cookies</a>
+                </div>
+            </div>
         </div>
     </footer>
 
@@ -267,7 +312,6 @@
         const formularioContainer = document.getElementById('formulario-container');
         const menuPromocion = document.getElementById('menuPromocion');
 
-        // VERIFICACIÓN CORREGIDA: Usar esAdministrador
         if (usuarioPromo && esAdministrador(usuarioPromo)) {
             accesoDenegado.style.display = 'none';
             formularioContainer.style.display = 'block';
@@ -277,21 +321,123 @@
             formularioContainer.style.display = 'none';
         }
 
-        // Aplicar color primario
         if (typeof aplicarColorPrimarioUsuario === 'function') {
             aplicarColorPrimarioUsuario();
         }
-        // Verificar si es una edición
+
+        // ==================== FUNCIÓN PARA BOTONES + Y - ====================
+        function initNumberButtons() {
+            document.querySelectorAll('.number-btn').forEach(btn => {
+                btn.removeEventListener('click', handleNumberClick);
+                btn.addEventListener('click', handleNumberClick);
+            });
+        }
+
+        function handleNumberClick(e) {
+            const btn = e.currentTarget;
+            const targetId = btn.getAttribute('data-target');
+            const input = document.getElementById(targetId);
+            if (!input) return;
+            
+            let value = parseInt(input.value) || 0;
+            const delta = btn.classList.contains('plus') ? 10 : -10;
+            value = Math.max(0, value + delta);
+            input.value = value;
+        }
+
+        // ==================== WIZARD ====================
+        let currentStep = 1;
+        const stepContents = document.querySelectorAll('.step-content');
+        const steps = document.querySelectorAll('.step');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const submitBtn = document.getElementById('submitBtn');
+
+        function validateStep(step) {
+            if (step === 1) {
+                if (!document.getElementById('nombre').value.trim()) { alert('Ingresa el nombre del evento'); return false; }
+                if (!document.getElementById('categoria').value) { alert('Selecciona una categoría'); return false; }
+                if (!document.getElementById('fechaInicio').value) { alert('Ingresa la fecha de inicio'); return false; }
+                return true;
+            }
+            if (step === 2) {
+                if (!document.getElementById('sede').value.trim()) { alert('Ingresa la sede o lugar'); return false; }
+                if (!document.getElementById('direccion').value.trim()) { alert('Ingresa la dirección'); return false; }
+                return true;
+            }
+            return true;
+        }
+
+        function updateWizard() {
+            stepContents.forEach((c, i) => c.classList.toggle('active', i + 1 === currentStep));
+            steps.forEach((s, i) => s.classList.toggle('active', i + 1 === currentStep));
+            prevBtn.disabled = currentStep === 1;
+            
+            if (currentStep === 3) {
+                nextBtn.style.display = 'none';
+                submitBtn.style.display = 'inline-block';
+            } else {
+                nextBtn.style.display = 'inline-block';
+                submitBtn.style.display = 'none';
+            }
+            
+            if (currentStep === 2) {
+                setTimeout(() => { if (window.map) window.map.invalidateSize(); else initMap(); }, 100);
+            }
+        }
+
+        if (prevBtn) {
+            prevBtn.addEventListener('click', () => {
+                if (currentStep > 1) {
+                    currentStep--;
+                    updateWizard();
+                }
+            });
+        }
+
+        if (nextBtn) {
+            nextBtn.addEventListener('click', () => {
+                if (validateStep(currentStep) && currentStep < 3) {
+                    currentStep++;
+                    updateWizard();
+                }
+            });
+        }
+
+        // ==================== MAPA ====================
+        let map, marker;
+        
+        function initMap() {
+            if (!document.getElementById('mapa')) return;
+            const isDark = localStorage.getItem('darkMode') === 'true';
+            const tileUrl = isDark ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png' : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
+            
+            map = L.map('mapa').setView([23.1136, -82.3666], 13);
+            L.tileLayer(tileUrl, { attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>' }).addTo(map);
+            
+            const lat = parseFloat(document.getElementById('lat').value) || 23.1136;
+            const lng = parseFloat(document.getElementById('lng').value) || -82.3666;
+            
+            marker = L.marker([lat, lng], { draggable: true }).addTo(map);
+            marker.on('dragend', () => {
+                const pos = marker.getLatLng();
+                document.getElementById('lat').value = pos.lat;
+                document.getElementById('lng').value = pos.lng;
+            });
+            
+            map.on('click', (e) => {
+                marker.setLatLng(e.latlng);
+                document.getElementById('lat').value = e.latlng.lat;
+                document.getElementById('lng').value = e.latlng.lng;
+            });
+        }
+
+        // ==================== EDITAR EVENTO (si aplica) ====================
         const urlParams = new URLSearchParams(window.location.search);
         const eventoIdEditar = urlParams.get('editar');
-        const eventoAEditar = eventoIdEditar ? getEventoById(eventoIdEditar) : JSON.parse(localStorage.getItem('eventoAEditar'));
+        const eventoAEditar = eventoIdEditar ? getEventoById(eventoIdEditar) : null;
 
         if (eventoAEditar) {
-            console.log("Editando evento:", eventoAEditar.nombre);
-            // Limpiar temporal
-            localStorage.removeItem('eventoAEditar');
-            
-            // Rellenar formulario con datos del evento
             setTimeout(() => {
                 document.getElementById('nombre').value = eventoAEditar.nombre || '';
                 document.getElementById('categoria').value = eventoAEditar.categoria || '';
@@ -302,6 +448,7 @@
                 document.getElementById('horaInicio').value = eventoAEditar.horaInicio || '';
                 document.getElementById('horaFin').value = eventoAEditar.horaFin || '';
                 document.getElementById('precio').value = eventoAEditar.precio || 0;
+                document.getElementById('maxInvitados').value = eventoAEditar.maxInvitados || 0;
                 document.getElementById('municipio').value = eventoAEditar.municipio || '';
                 document.getElementById('sede').value = eventoAEditar.sede || '';
                 document.getElementById('direccion').value = eventoAEditar.direccion || '';
@@ -313,280 +460,73 @@
                 document.getElementById('lat').value = eventoAEditar.lat || 23.1136;
                 document.getElementById('lng').value = eventoAEditar.lng || -82.3666;
                 
-                // Cambiar texto del botón
-                const submitBtn = document.getElementById('submitBtn');
-                if (submitBtn) submitBtn.textContent = 'Actualizar evento';
+                const submitBtnElem = document.getElementById('submitBtn');
+                if (submitBtnElem) submitBtnElem.textContent = 'Actualizar evento';
             }, 100);
         }
 
-        // Modificar el envío del formulario para actualizar en lugar de crear
+        // ==================== ENVIAR FORMULARIO ====================
         const formEvento = document.getElementById('form-evento');
         if (formEvento) {
-            const originalSubmit = formEvento.onsubmit;
             formEvento.addEventListener('submit', (e) => {
+                e.preventDefault();
+                if (!document.getElementById('responsable').checked) {
+                    alert('Debes aceptar la responsabilidad de la información');
+                    return;
+                }
+                
+                const nuevoEvento = {
+                    nombre: document.getElementById('nombre').value,
+                    categoria: document.getElementById('categoria').value,
+                    poster: document.getElementById('poster').value || 'https://picsum.photos/id/100/400/300',
+                    descripcion: document.getElementById('descripcion').value,
+                    fechaInicio: document.getElementById('fechaInicio').value,
+                    fechaFin: document.getElementById('fechaFin').value || document.getElementById('fechaInicio').value,
+                    horaInicio: document.getElementById('horaInicio').value,
+                    horaFin: document.getElementById('horaFin').value,
+                    precio: parseFloat(document.getElementById('precio').value) || 0,
+                    maxInvitados: parseInt(document.getElementById('maxInvitados').value) || 0,
+                    aptoMenores: document.getElementById('aptoMenores').checked,
+                    aireLibre: document.getElementById('aireLibre').checked,
+                    posibilidadReserva: document.getElementById('posibilidadReserva').checked,
+                    municipio: document.getElementById('municipio').value,
+                    sede: document.getElementById('sede').value,
+                    ubicacion: document.getElementById('direccion').value,
+                    direccion: document.getElementById('direccion').value,
+                    lat: parseFloat(document.getElementById('lat').value),
+                    lng: parseFloat(document.getElementById('lng').value),
+                    organizador: document.getElementById('organizador').value,
+                    telefono: document.getElementById('telefono').value,
+                    contactoReserva: document.getElementById('contactoReserva').value,
+                    creadoPor: usuarioPromo ? usuarioPromo.id : 'admin'
+                };
+                
                 if (eventoAEditar) {
-                    e.preventDefault();
-                    // Actualizar evento existente
-                    const datosActualizados = {
-                        nombre: document.getElementById('nombre').value,
-                        categoria: document.getElementById('categoria').value,
-                        poster: document.getElementById('poster').value || 'https://picsum.photos/id/100/400/300',
-                        descripcion: document.getElementById('descripcion').value,
-                        fechaInicio: document.getElementById('fechaInicio').value,
-                        fechaFin: document.getElementById('fechaFin').value || document.getElementById('fechaInicio').value,
-                        horaInicio: document.getElementById('horaInicio').value,
-                        horaFin: document.getElementById('horaFin').value,
-                        precio: parseFloat(document.getElementById('precio').value) || 0,
-                        aptoMenores: document.getElementById('aptoMenores').checked,
-                        aireLibre: document.getElementById('aireLibre').checked,
-                        posibilidadReserva: document.getElementById('posibilidadReserva').checked,
-                        municipio: document.getElementById('municipio').value,
-                        sede: document.getElementById('sede').value,
-                        direccion: document.getElementById('direccion').value,
-                        ubicacion: document.getElementById('direccion').value,
-                        lat: parseFloat(document.getElementById('lat').value),
-                        lng: parseFloat(document.getElementById('lng').value),
-                        organizador: document.getElementById('organizador').value,
-                        telefono: document.getElementById('telefono').value,
-                        contactoReserva: document.getElementById('contactoReserva').value
-                    };
-                    
-                    if (actualizarEvento(eventoAEditar.id, datosActualizados)) {
+                    if (actualizarEvento(eventoAEditar.id, nuevoEvento)) {
                         alert('Evento actualizado correctamente');
                         window.location.href = 'inicio.html';
                     } else {
                         alert('Error al actualizar el evento');
                     }
+                } else {
+                    agregarEvento(nuevoEvento);
+                    alert('¡Evento publicado exitosamente!');
+                    window.location.href = 'inicio.html';
                 }
             });
         }
 
-        // Función para los botones + y -
-        function changeNumber(inputId, delta) {
-            const input = document.getElementById(inputId);
-            if (input) {
-                let value = parseInt(input.value) || 0;
-                value = Math.max(0, value + delta);
-                input.value = value;
-            }
+        // Mostrar enlace de promocionar en footer solo para administradores
+        const usuarioFooter = getUsuarioActual();
+        if (usuarioFooter && esAdministrador(usuarioFooter)) {
+            const footerPromo = document.getElementById('footerPromocionLink');
+            if (footerPromo) footerPromo.style.display = 'list-item';
         }
-        
-        // ==================== DOM Elements ====================
-        const sidebar = document.getElementById('sidebar');
-        const menuToggleBtn = document.getElementById('menuToggleBtn');
-        const themeToggleBtn = document.getElementById('themeToggleBtn');
-        const avatarDiv = document.getElementById('avatarUsuario');
-        const buscadorGlobal = document.getElementById('buscador-global');
-        const searchBtn = document.getElementById('searchBtn');
-        
-        let isDarkMode = localStorage.getItem('darkMode') === 'true';
-        let map, marker;
-        
-        // ==================== Tema Oscuro ====================
-        function applyTheme() {
-            const iconPairs = ['home', 'categories', 'dropdown', 'calendar', 'map', 'promo'];
-            iconPairs.forEach(icon => {
-                const lightIcon = document.querySelector(`.${icon}-light`);
-                const darkIcon = document.querySelector(`.${icon}-dark`);
-                if (lightIcon && darkIcon) {
-                    if (isDarkMode) { lightIcon.style.display = 'none'; darkIcon.style.display = 'inline-block'; }
-                    else { lightIcon.style.display = 'inline-block'; darkIcon.style.display = 'none'; }
-                }
-            });
-            
-            const searchLight = document.getElementById('searchIconLight');
-            const searchDark = document.getElementById('searchIconDark');
-            const themeLight = document.getElementById('themeIconLight');
-            const themeDark = document.getElementById('themeIconDark');
-            const notifLight = document.getElementById('notifIconLight');
-            const notifDark = document.getElementById('notifIconDark');
-            const menuIcon = document.getElementById('menuIcon');
-            
-            if (isDarkMode) {
-                document.body.classList.add('dark-mode');
-                if (searchLight) searchLight.style.display = 'none';
-                if (searchDark) searchDark.style.display = 'inline-block';
-                if (themeLight) themeLight.style.display = 'none';
-                if (themeDark) themeDark.style.display = 'inline-block';
-                if (notifLight) notifLight.style.display = 'none';
-                if (notifDark) notifDark.style.display = 'inline-block';
-                if (menuIcon) menuIcon.src = 'resources/icons_dark/menu.png';
-            } else {
-                document.body.classList.remove('dark-mode');
-                if (searchLight) searchLight.style.display = 'inline-block';
-                if (searchDark) searchDark.style.display = 'none';
-                if (themeLight) themeLight.style.display = 'inline-block';
-                if (themeDark) themeDark.style.display = 'none';
-                if (notifLight) notifLight.style.display = 'inline-block';
-                if (notifDark) notifDark.style.display = 'none';
-                if (menuIcon) menuIcon.src = 'resources/icons_light/menu.png';
-            }
-        }
-        
-        themeToggleBtn.addEventListener('click', () => {
-            isDarkMode = !isDarkMode;
-            localStorage.setItem('darkMode', isDarkMode);
-            applyTheme();
-        });
-        applyTheme();
-        
-        // ==================== Menú Lateral ====================
-        let isMenuMinimized = localStorage.getItem('menuMinimized') === 'true';
-        
-        function toggleMenuMinimize() {
-            isMenuMinimized = !isMenuMinimized;
-            localStorage.setItem('menuMinimized', isMenuMinimized);
-            if (isMenuMinimized) sidebar.classList.add('minimize');
-            else sidebar.classList.remove('minimize');
-        }
-        
-        menuToggleBtn.addEventListener('click', toggleMenuMinimize);
-        
-        if (isMenuMinimized) sidebar.classList.add('minimize');
-        else sidebar.classList.remove('minimize');
-        
-        let categoriasOpen = false;
-        const submenuCategorias = document.getElementById('submenuCategorias');
-        document.getElementById('categoriasBtn')?.addEventListener('click', (e) => {
-            e.preventDefault();
-            if (sidebar.classList.contains('minimize')) return;
-            categoriasOpen = !categoriasOpen;
-            if (categoriasOpen) {
-                submenuCategorias.style.height = `${submenuCategorias.scrollHeight + 10}px`;
-                submenuCategorias.style.padding = '0.2rem 0';
-            } else {
-                submenuCategorias.style.height = '0';
-                submenuCategorias.style.padding = '0';
-            }
-        });
-        
-        // ==================== Avatar ====================
-        function updateAvatar() {
-            const usuarioActual = getUsuarioActual();
-            if (usuarioActual && usuarioActual.nombre) {
-                const initial = usuarioActual.nombre.charAt(0).toUpperCase();
-                avatarDiv.textContent = initial;
-                avatarDiv.style.backgroundColor = usuarioActual.avatarColor || '#2ecc71';
-            } else {
-                avatarDiv.textContent = '?';
-                avatarDiv.style.backgroundColor = '#9CA2B8';
-            }
-        }
-        
-        avatarDiv.addEventListener('click', () => {
-            const usuarioActual = getUsuarioActual();
-            if (usuarioActual) {
-                if (confirm(`Cerrar sesión ${usuarioActual.nombre}?`)) {
-                    cerrarSesion();
-                    window.location.href = 'inicio.html';
-                }
-            } else {
-                window.location.href = 'login.html';
-            }
-        });
-        
-        // ==================== Búsqueda Global ====================
-        function realizarBusqueda() {
-            const termino = buscadorGlobal.value.trim();
-            if (termino) window.location.href = `busqueda.html?q=${encodeURIComponent(termino)}`;
-        }
-        
-        buscadorGlobal.addEventListener('keypress', (e) => { if (e.key === 'Enter') realizarBusqueda(); });
-        if (searchBtn) searchBtn.addEventListener('click', realizarBusqueda);
-        
-        // ==================== Wizard ====================
-        let currentStep = 1;
-        const stepContents = document.querySelectorAll('.step-content');
-        const steps = document.querySelectorAll('.step');
-        const prevBtn = document.getElementById('prevBtn');
-        const nextBtn = document.getElementById('nextBtn');
-        const submitBtn = document.getElementById('submitBtn');
-        
-        function updateWizard() {
-            stepContents.forEach((c, i) => c.classList.toggle('active', i + 1 === currentStep));
-            steps.forEach((s, i) => s.classList.toggle('active', i + 1 === currentStep));
-            prevBtn.disabled = currentStep === 1;
-            if (currentStep === 3) {
-                nextBtn.style.display = 'none';
-                submitBtn.style.display = 'inline-block';
-            } else {
-                nextBtn.style.display = 'inline-block';
-                submitBtn.style.display = 'none';
-            }
-            if (currentStep === 2) setTimeout(() => { if (map) map.invalidateSize(); else initMap(); }, 100);
-        }
-        
-        prevBtn.addEventListener('click', () => { if (currentStep > 1) { currentStep--; updateWizard(); } });
-        nextBtn.addEventListener('click', () => { if (validateStep(currentStep) && currentStep < 3) { currentStep++; updateWizard(); } });
-        
-        function validateStep(step) {
-            if (step === 1) {
-                if (!document.getElementById('nombre').value) { alert('Ingresa el nombre del evento'); return false; }
-                if (!document.getElementById('categoria').value) { alert('Selecciona una categoría'); return false; }
-                if (!document.getElementById('fechaInicio').value) { alert('Ingresa la fecha de inicio'); return false; }
-                return true;
-            }
-            if (step === 2) {
-                if (!document.getElementById('sede').value) { alert('Ingresa la sede o lugar'); return false; }
-                if (!document.getElementById('direccion').value) { alert('Ingresa la dirección'); return false; }
-                return true;
-            }
-            return true;
-        }
-        
-        function initMap() {
-            if (!document.getElementById('mapa')) return;
-            map = L.map('mapa').setView([23.1136, -82.3666], 13);
-            const tileUrl = isDarkMode ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png' : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
-            L.tileLayer(tileUrl).addTo(map);
-            marker = L.marker([23.1136, -82.3666], { draggable: true }).addTo(map);
-            marker.on('dragend', () => { const p = marker.getLatLng(); document.getElementById('lat').value = p.lat; document.getElementById('lng').value = p.lng; });
-            map.on('click', (e) => { marker.setLatLng(e.latlng); document.getElementById('lat').value = e.latlng.lat; document.getElementById('lng').value = e.latlng.lng; });
-        }
-        
-        // ==================== Enviar Evento ====================
-        document.getElementById('form-evento').addEventListener('submit', (e) => {
-            e.preventDefault();
-            if (!document.getElementById('responsable').checked) { alert('Debes aceptar la responsabilidad de la información'); return; }
-            
-            const nuevoEvento = {
-                nombre: document.getElementById('nombre').value,
-                categoria: document.getElementById('categoria').value,
-                poster: document.getElementById('poster').value || 'https://picsum.photos/id/100/400/300',
-                descripcion: document.getElementById('descripcion').value,
-                fechaInicio: document.getElementById('fechaInicio').value,
-                fechaFin: document.getElementById('fechaFin').value || document.getElementById('fechaInicio').value,
-                horaInicio: document.getElementById('horaInicio').value,
-                horaFin: document.getElementById('horaFin').value,
-                precio: parseFloat(document.getElementById('precio').value) || 0,
-                maxInvitados: parseInt(document.getElementById('maxInvitados').value) || 0,
-                aptoMenores: document.getElementById('aptoMenores').checked,
-                aireLibre: document.getElementById('aireLibre').checked,
-                posibilidadReserva: document.getElementById('posibilidadReserva').checked,
-                municipio: document.getElementById('municipio').value,
-                sede: document.getElementById('sede').value,
-                ubicacion: document.getElementById('direccion').value,
-                direccion: document.getElementById('direccion').value,
-                lat: parseFloat(document.getElementById('lat').value),
-                lng: parseFloat(document.getElementById('lng').value),
-                organizador: document.getElementById('organizador').value,
-                telefono: document.getElementById('telefono').value,
-                contactoReserva: document.getElementById('contactoReserva').value,
-                creadoPor: usuarioPromo.id // Usar usuarioPromo en lugar de usuario
-            };
-            
-            agregarEvento(nuevoEvento);
-            alert('¡Evento publicado exitosamente!');
-            window.location.href = 'inicio.html';
-        });
-        
-        // ==================== Inicializar ====================
-        updateAvatar();
+
+        // ==================== INICIALIZAR ====================
+        initNumberButtons();
         updateWizard();
-        
-        document.getElementById('notificationsBtn')?.addEventListener('click', () => {
-            alert('📢 Notificaciones: Próximamente podrás recibir alertas de tus eventos favoritos.');
-        });
+        setTimeout(() => { if (document.getElementById('mapa')) initMap(); }, 200);
     </script>
     
     <style>

@@ -82,9 +82,23 @@ function generarNotificaciones() {
                 id: `${evento.id}_7dias`,
                 eventoId: evento.id,
                 titulo: evento.nombre,
-                mensaje: `📅 Comienza en 7 días`,
+                mensaje: `Comienza en 7 días`,
                 direccion: evento.ubicacion || evento.direccion,
                 fecha: new Date(fechaEvento.getTime() - 7 * 24 * 60 * 60 * 1000),
+                leida: false,
+                tipo: "anticipacion"
+            });
+        }
+
+        // Notificación de 1 día
+        if (preferenciasNotificacion.unDia && diffDias === 1) {
+            notificaciones.push({
+                id: `${evento.id}_1dia`,
+                eventoId: evento.id,
+                titulo: evento.nombre,
+                mensaje: `Comienza mañana`,
+                direccion: evento.ubicacion || evento.direccion,
+                fecha: new Date(fechaEvento.getTime() - 24 * 60 * 60 * 1000),
                 leida: false,
                 tipo: "anticipacion"
             });
@@ -96,7 +110,7 @@ function generarNotificaciones() {
                 id: `${evento.id}_1hora`,
                 eventoId: evento.id,
                 titulo: evento.nombre,
-                mensaje: `⏰ Comienza en 1 hora`,
+                mensaje: `Comienza en 1 hora`,
                 direccion: evento.ubicacion || evento.direccion,
                 fecha: new Date(fechaEvento.getTime() - 60 * 60 * 1000),
                 leida: false,
@@ -110,7 +124,7 @@ function generarNotificaciones() {
                 id: `${evento.id}_30min`,
                 eventoId: evento.id,
                 titulo: evento.nombre,
-                mensaje: `⏰ Comienza en 30 minutos`,
+                mensaje: `Comienza en 30 minutos`,
                 direccion: evento.ubicacion || evento.direccion,
                 fecha: new Date(fechaEvento.getTime() - 30 * 60 * 1000),
                 leida: false,
@@ -176,11 +190,10 @@ function renderizarPanelNotificaciones() {
     
     panel.innerHTML = notificaciones.map(notif => `
         <div class="notif-item ${notif.leida ? '' : 'notif-no-leida'}" data-evento-id="${notif.eventoId}" data-notif-id="${notif.id}">
-            <div class="notif-icon">${notif.tipo === 'anticipacion' ? '📅' : '⏰'}</div>
             <div class="notif-content">
                 <div class="notif-title">${notif.titulo}</div>
                 <div class="notif-message">${notif.mensaje}</div>
-                <div class="notif-location">📍 ${notif.direccion ? notif.direccion.substring(0, 50) : 'Ubicación no especificada'}${notif.direccion && notif.direccion.length > 50 ? '...' : ''}</div>
+                <div class="notif-location"> ${notif.direccion ? notif.direccion.substring(0, 50) : 'Ubicación no especificada'}${notif.direccion && notif.direccion.length > 50 ? '...' : ''}</div>
                 <div class="notif-time">${formatFechaRelativa(notif.fecha)}</div>
             </div>
         </div>

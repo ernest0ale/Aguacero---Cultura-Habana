@@ -542,11 +542,11 @@ function initAvatar() {
         `;
         avatarSubmenu.innerHTML = `
             <a href="perfil.html" class="avatar-submenu-item">
-                <span>⚙️ Configuración</span>
+                <span>Configuración</span>
             </a>
             <div class="avatar-submenu-divider"></div>
             <a href="#" id="logoutSubmenuBtn" class="avatar-submenu-item">
-                <span>🚪 Cerrar sesión</span>
+                <span>Cerrar sesión</span>
             </a>
         `;
         document.body.appendChild(avatarSubmenu);
@@ -692,11 +692,17 @@ function initSearch() {
 
 // ==================== NOTIFICACIONES ====================
 function initNotifications() {
-    const notifBtn = document.getElementById('notificationsBtn');
-    if (notifBtn) {
-        notifBtn.addEventListener('click', () => {
-            alert('📢 Notificaciones: Próximamente podrás recibir alertas.');
-        });
+    // Llamar al sistema de notificaciones mejorado desde notifications.js
+    if (typeof initNotificationsSystem === 'function') {
+        initNotificationsSystem();
+    } else {
+        // Fallback por si notifications.js no carga
+        const notifBtn = document.getElementById('notificationsBtn');
+        if (notifBtn) {
+            notifBtn.addEventListener('click', () => {
+                alert('Sistema de notificaciones no disponible. Intenta recargar la página.');
+            });
+        }
     }
 }
 

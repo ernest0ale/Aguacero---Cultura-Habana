@@ -43,7 +43,7 @@
                     <span id="notifCounter" class="notif-counter" style="display: none;">0</span>
                 </button>
                 <div id="notificationsPanel" class="notifications-panel">
-                    <div class="notifications-header">📢 Notificaciones</div>
+                    <div class="notifications-header">Notificaciones</div>
                     <div class="notifications-list"></div>
                 </div>
             </div>
@@ -158,55 +158,62 @@
 
     <footer class="footer">
         <div class="footer-container">
-            <!-- Columna 1: Logo y descripción -->
-            <div class="footer-column">
-                <div class="footer-logo">
-                    <img src="resources/aguacero_cuba_logo_trasnparente.png" alt="Cultura Habana">
-                    <span>Cultura Habana</span>
+            <div class="footer-columns">
+                <!-- Columna 1: Logo + descripción -->
+                <div class="footer-col-1">
+                    <div class="footer-logo">
+                        <img src="resources/aguacero_cuba_darklogo_trasnparente.png" alt="Cultura Habana">
+                        <span>Cultura Habana</span>
+                    </div>
+                    <p class="footer-description">
+                        Los mejores planes en La Habana se encuentran bajo este Aguacero.
+                        <br><br>
+                        Deja la sombrilla en casa, ¡no te pierdas ni una gota de cultura!
+                    </p>
+                    <div class="footer-social">
+                        <a href="https://www.facebook.com/aguacerocuba" class="social-icon-link" target="_blank">
+                            <img src="resources/icons_light/facebook.png" alt="Facebook">
+                        </a>
+                        <a href="https://www.instagram.com/aguacero_cuba/" class="social-icon-link" target="_blank">
+                            <img src="resources/icons_light/instagram.png" alt="Instagram">
+                        </a>
+                        <a href="https://t.me/Aguacero" class="social-icon-link" target="_blank">
+                            <img src="resources/icons_light/telegram.png" alt="Telegram">
+                        </a>
+                        <a href="https://www.whatsapp.com/channel/0029VbApHoQKmCPX3VynJs2n" class="social-icon-link" target="_blank">
+                            <img src="resources/icons_light/whatsapp.png" alt="WhatsApp">
+                        </a>
+                    </div>
                 </div>
-                <p class="footer-description">
-                    Los mejores planes en La Habana se encuentran bajo este Aguacero.<br>
-                    Deja la sombrilla en casa, ¡no te pierdas ni una gota de cultura!
-                </p>
-            </div>
-
-            <!-- Columna 2: Enlaces rápidos -->
-            <div class="footer-column">
-                <h3>Explorar</h3>
-                <ul class="footer-links">
-                    <li><a href="inicio.html">Inicio</a></li>
-                    <li><a href="calendario.html">Calendario</a></li>
-                    <li><a href="mapa.html">Mapa</a></li>
-
-                </ul>
-            </div>
-
-            <!-- Columna 3: Soporte / Legal -->
-            <div class="footer-column">
-                <h3>Legal</h3>
-                <ul class="footer-links">
-                    <li><a href="#" id="faqLink">Preguntas frecuentes</a></li>
-                    <li><a href="#" id="termsLink">Términos y condiciones</a></li>
-                    <li><a href="#" id="privacyLink">Política de privacidad</a></li>
-                    <li><a href="mailto:contacto@culturahabana.com">contacto@culturahabana.com</a></li>
-                </ul>
-            </div>
-
-            <!-- Columna 4: Redes sociales -->
-            <div class="footer-column">
-                <h3>Síguenos</h3>
-                <div class="footer-social">
-                    <a href="https://www.facebook.com/aguacerocuba" class="social-icon" target="_blank">Facebook</a>
-                    <a href="https://www.instagram.com/aguacero_cuba/" class="social-icon" target="_blank">Instagram</a>
-                    <a href="https://www.whatsapp.com/channel/0029VbApHoQKmCPX3VynJs2n" class="social-icon" target="_blank">WhatsApp</a>
-                    <a href="https://t.me/Aguacero" class="social-icon" target="_blank">Telegram</a>
+                
+                <!-- Columna 2: Explorar -->
+                <div class="footer-col-2">
+                    <h3>EXPLORAR</h3>
+                    <ul class="footer-links">
+                        <li><a href="inicio.html">Inicio</a></li>
+                        <li><a href="calendario.html">Calendario</a></li>
+                        <li><a href="mapa.html">Mapa</a></li>
+                        <li id="footerPromocionLink" style="display: none;"><a href="promocion.html">Promocionar</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Columna 3: Contacto -->
+                <div class="footer-col-3">
+                    <h3>CONTACTO</h3>
+                    <div class="contact-item"><strong>Tel:</strong> <a href="tel:+5351234567">+53 5123 4567</a></div>
+                    <div class="contact-item"><strong>Co:</strong> <a href="mailto:contacto@culturahabana.com">contacto@culturahabana.com</a></div>
+                    <div class="contact-item"><strong>Ub:</strong> <span>La Habana, Cuba</span></div>
                 </div>
             </div>
-        </div>
-        
-        <div class="footer-bottom">
-            <p>&copy; 2025 Cultura Habana. Todos los derechos reservados.</p>
-            <p>Diseñado con ❤️ para La Habana</p>
+            
+            <div class="footer-bottom">
+                <p class="footer-copyright">&copy; 2025 Cultura Habana. Todos los derechos reservados.</p>
+                <div class="footer-legal">
+                    <a href="#">Política de privacidad</a>
+                    <a href="#">Términos de servicio</a>
+                    <a href="#">Política de cookies</a>
+                </div>
+            </div>
         </div>
     </footer>
 
@@ -336,7 +343,7 @@
             container.innerHTML = categorias.map(cat => `
                 <label class="categoria-checkbox">
                     <input type="checkbox" class="filtro-categoria" value="${cat}" ${categoriasSeleccionadasCalendario.includes(cat) ? 'checked' : ''}> 
-                    ${getIconoCategoria(cat)} ${cat}
+                    ${cat}
                     ${preferencias.includes(cat) ? '<span style="color: #f39c12;"> ⭐</span>' : ''}
                 </label>
             `).join('');
@@ -437,6 +444,13 @@
         
         renderizarFiltrosCalendario();
         renderizarEventosCalendario();
+
+        // Mostrar enlace de promocionar en footer solo para administradores
+        const usuarioFooter = getUsuarioActual();
+        if (usuarioFooter && esAdministrador(usuarioFooter)) {
+            const footerPromo = document.getElementById('footerPromocionLink');
+            if (footerPromo) footerPromo.style.display = 'list-item';
+        }
     </script>
 </body>
 </html>
