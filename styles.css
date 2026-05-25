@@ -22,14 +22,15 @@
 }
 
 body.dark-mode {
-    --color-bg: rgb(30, 34, 39);
-    --color-surface: rgb(35, 39, 46);
+    --color-bg: rgb(33, 36, 37);
+    --color-surface: rgb(24, 26, 27);
     --color-border: #2B2D3B;
     --color-text-primary: #FFFFFF;
     --color-text-secondary: #9CA2B8;
     --color-tooltip-bg: #ffffff;
     --color-tooltip-text: #000000;
-    --shadow-border: rgba(255, 255, 255, 0.1);
+    --shadow-border: rgba(0, 0, 0, 0.1);
+    /*--shadow-border: rgba(255, 255, 255, 0.1);*/
 }
 
 /* ========== ESTILOS BASE ========== */
@@ -177,6 +178,31 @@ body {
     justify-content: center;
     cursor: pointer;
     transition: all 0.3s ease;
+}
+
+/* ========== BOTÓN VOLVER ========== */
+.btn-volver {
+    display: inline-block;
+    padding: 0.6rem 1.2rem;
+    background: rgb(2, 90, 138);;
+    color: white;
+    text-decoration: none;
+    border-radius: 30px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border: 1px solid var(--color-border);
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.btn-volver:hover {
+    background: rgb(2, 110, 168);
+    transform: translateX(-4px);
+}
+
+/* ========== CORRECCIÓN TEMA OSCURO: TÍTULO EN BARRA SUPERIOR ========== */
+body.dark-mode .logo span {
+    color: white;
 }
 
 /* ========== MENÚ LATERAL ========== */
@@ -547,7 +573,7 @@ body {
 .filters-sidebar h3 {
     font-size: 0.9rem;
     margin-bottom: 0.75rem;
-    margin-top: 1rem;
+    margin-top: 0.5rem;
     color: var(--color-text-primary);
 }
 
@@ -565,7 +591,7 @@ body {
     padding: 0.3rem 0.8rem;
     background: var(--color-bg);
     border-radius: 30px;
-    font-size: 0.75rem;
+    font-size: 0.8rem;
     cursor: pointer;
     color: var(--color-text-primary);
 }
@@ -652,13 +678,13 @@ body {
     padding: 0.4rem 0.8rem;
     border: 1px solid var(--color-border);
     border-radius: 8px;
-    background: var(--color-bg);
+    background: var(--color-surface);
     color: var(--color-text-primary);
     font-size: 0.8rem;
 }
 
 .resultados-scroll {
-    max-height: calc(100vh - 250px);
+    max-height: calc(250vh - 250px);
     overflow-y: auto;
     padding-right: 0.5rem;
 }
@@ -667,6 +693,27 @@ body {
     text-align: center;
     padding: 2rem;
     color: var(--color-text-secondary);
+}
+
+.filters-sidebar .modo-select {
+    width: 100%;
+    padding: 0.4rem 0.8rem;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    background: var(--color-surface);
+    color: var(--color-text-primary);
+    font-size: 0.9rem;
+    margin-bottom: 0.8rem;
+}
+
+.filters-sidebar .fecha-input {
+    width: 100%;
+    padding: 0.7rem;
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    background: var(--color-bg);
+    color: var(--color-text-primary);
+    margin-bottom: 0.8rem;
 }
 
 /* ========== DETALLE EVENTO ========== */
@@ -688,52 +735,47 @@ body {
     margin: 1rem 0;
 }
 
-/* ========== FOOTER CORREGIDO ========== */
-.sidebar.minimize ~ .footer {
-    margin-left: var(--sidebar-collapsed-width);
+.detalle-info .categoria-badge {
+  display: inline-block;
+  background: var(--color-primary);
+  color: white;
+  padding: 0.3rem 0.8rem;
+  border-radius: 20px;
+  margin-bottom: 1rem;
 }
 
-/* Para pantallas pequeñas, que se apilen */
-@media (max-width: 700px) {
-    .footer-container {
-        flex-direction: column;
-        gap: 2rem;
-        text-align: center;
-        align-items: center;
-    }
-    .footer-column h3::after {
-        left: 50%;
-        transform: translateX(-50%);
-    }
-    .footer-logo {
-        justify-content: center;
-    }
+.detalle-contacto, .detalle-descripcion{
+    margin-top: 1.5rem;
+}
+
+/* ========== MENÚ LATERAL MINIMIZADO CORREGIDO ========== */
+/* Oculta los iconos de dropdown cuando el menú está minimizado */
+.sidebar.minimize .menu-link .dropdown-light,
+.sidebar.minimize .menu-link .dropdown-dark {
+    display: none !important;
+}
+
+/* Ajusta la posición del menú flotante de categorías */
+.sidebar.minimize .sub-menu.floating-submenu {
+    position: fixed !important;
+    background-color: var(--color-surface) !important;
+    border-radius: 0.5rem !important;
+    box-shadow: 0 4px 12px var(--shadow-border) !important;
+    padding: 0.5rem 0 !important;
+    border: 1px solid var(--color-border) !important;
+    overflow-y: auto !important;
+    z-index: 10000 !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    height: auto !important;
+    width: 180px !important;
+    /* Posición corregida: al lado del icono de categorías */
+    left: 5rem !important;
+    top: 7.5rem !important;
 }
 
 /* ========== FOOTER ========== */
-.footer {
-    background: var(--color-primary);
-    color: white;
-    margin-top: 3rem;
-    padding: 2rem 1rem 0;
-    transition: all 0.3s ease;
-    margin-left: var(--sidebar-width); /* Sigue al sidebar */
-}
-
-.footer-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    display: flex; /* Cambiado de grid a flex */
-    flex-wrap: wrap;
-    justify-content: flex-start; /* Alinear a la izquierda */
-    gap: 3rem; /* Espacio entre columnas */
-    padding: 1rem 0 2rem;
-}
-
-.footer-column {
-    flex: 0 0 auto;
-    min-width: 180px; /* Ancho mínimo */
-}
 
 .footer-logo {
     display: flex;
@@ -941,12 +983,10 @@ body.dark-mode .footer {
 }
 
 /* ========== BADGES ========== */
-.badge-menores-si, .badge-menores-no, .badge-aire-si, .badge-aire-no,
-.caracteristica.badge-menores-si, .caracteristica.badge-menores-no,
-.caracteristica.badge-aire-si, .caracteristica.badge-aire-no {
+.badge-menores-si, .badge-menores-no, .badge-aire-si, .badge-aire-no {
     padding: 0.3rem 0.8rem;
     border-radius: 30px;
-    font-size: 0.75rem;
+    font-size: 0.9rem;
     display: inline-block;
     margin-right: 0.5rem;
     margin-bottom: 0.5rem;
@@ -954,21 +994,22 @@ body.dark-mode .footer {
     border: none;
 }
 
-.badge-menores-si, .caracteristica.badge-menores-si { background: #27ae60; }
-.badge-menores-no, .caracteristica.badge-menores-no { background: #e67e22; }
-.badge-aire-si, .caracteristica.badge-aire-si { background: #2ecc71; }
-.badge-aire-no, .caracteristica.badge-aire-no { background: #3498db; }
+.badge-menores-si { background: #27ae60; }
+.badge-menores-no { background: #e67e22; }
+.badge-aire-si { background: #97cc2e; }
+.badge-aire-no { background: #3498db; }
 
 .caracteristica {
     display: inline-block;
     padding: 0.3rem 0.8rem;
     border-radius: 30px;
-    font-size: 0.75rem;
+    font-size: 0.9rem;
     margin-right: 0.5rem;
     margin-bottom: 0.5rem;
-    background: var(--color-surface);
+    background: #d8ac0b;
+    
     border: 1px solid var(--color-border);
-    color: var(--color-text-primary);
+    color: white;
 }
 
 /* ========== BOTONES ADMIN ========== */
@@ -1200,3 +1241,564 @@ body.dark-mode .footer {
         transform: translateX(-50%);
     }
 }
+
+/* ========== BOTONES DE DETALLE DE EVENTO (VISIBILIDAD ASEGURADA) ========== */
+#recordatorio-container {
+    margin: 1.5rem 0;
+    text-align: center;
+    display: block !important;
+}
+
+#btn-recordar-evento {
+    background: #f39c12 !important;
+    color: white !important;
+    padding: 0.8rem 1.5rem !important;
+    border: none !important;
+    border-radius: 30px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+    font-size: 0.95rem !important;
+}
+
+#btn-recordar-evento:hover:not(:disabled) {
+    background: #e67e22 !important;
+    transform: translateY(-2px) !important;
+}
+
+#btn-recordar-evento:disabled {
+    background: #27ae60 !important;
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+/* ========== FOOTER CORREGIDO (inspirado en template) ========== */
+.footer {
+    background-color: rgb(2, 90, 138);
+    margin-top: 3rem;
+    padding-top: 2rem;
+    transition: margin-left 0.5s ease;
+    margin-left: var(--sidebar-width);
+}
+
+.sidebar.minimize ~ .footer {
+    margin-left: var(--sidebar-collapsed-width);
+}
+
+.footer .footer-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+/* Tres columnas */
+.footer-columns {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 2rem;
+}
+
+.footer-col-1 {
+    width: 33.33%;
+    padding: 0 15px;
+}
+
+.footer-col-2 {
+    width: 33.33%;
+    padding: 0 15px;
+}
+
+.footer-col-3 {
+    width: 33.33%;
+    padding: 0 15px;
+}
+
+/* Logo y descripción */
+.footer-logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.footer-logo img {
+    height: 40px;
+}
+
+.footer-logo span {
+    font-size: 20px;
+    font-weight: 700;
+    color: white;
+}
+
+.footer-description {
+    font-size: 0.8rem;
+    line-height: 1.5;
+    color: white;
+    text-align: justify;
+    max-width: 280px;
+    margin: 0 auto;
+}
+
+/* Títulos con línea debajo (misma longitud que el texto) */
+.footer-col-2 h3,
+.footer-col-3 h3 {
+    font-size: 15px;
+    margin-bottom: 15px;
+    text-align: center;
+    color: white;
+    display: inline-block;
+    width: auto;
+    border-bottom: 2px solid white;
+    padding-bottom: 10px;
+}
+
+.footer-col-2 {
+    text-align: left;
+}
+
+.footer-col-3 {
+    text-align: left;
+}
+
+/* Enlaces */
+.footer-links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    text-align: left;
+}
+
+.footer-links li {
+    margin-bottom: 0.5rem;
+}
+
+.footer-links a {
+    color: rgba(255, 255, 255, 0.85);
+    text-decoration: none;
+    font-size: 0.85rem;
+    transition: all 0.3s ease;
+}
+
+.footer-links a:hover {
+    color: white;
+    padding-left: 4px;
+}
+
+/* Contacto */
+.contact-item {
+    margin-bottom: 0.5rem;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.85);
+    text-align: left;
+}
+
+.contact-item strong {
+    font-weight: 600;
+    margin-right: 0.3rem;
+}
+
+.contact-item a {
+    color: rgba(255, 255, 255, 0.85);
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.contact-item a:hover {
+    color: white;
+    padding-left: 4px;
+}
+
+/* Redes sociales - con los márgenes que pediste */
+.footer-social {
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: center !important;
+    gap: 1.5rem !important;
+    margin-left: 1rem !important;
+    margin-top: 1.5rem !important;
+}
+
+.social-icon-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 45px;
+    height: 40px;
+    background-color: rgb(2, 107, 164);
+    border-radius: 50%;
+    transition: transform 0.5s ease;
+}
+
+.social-icon-link:hover {
+    transform: translateY(-10px);
+}
+
+.social-icon-link img {
+    width: 22px;
+    height: 22px;
+    filter: brightness(0) invert(1);
+}
+
+
+/* Eliminar cualquier línea divisoria duplicada */
+.footer-bottom::before,
+.footer-columns::after,
+.footer-container > hr:not(.footer-divider) {
+    display: none !important;
+}
+
+/* Footer bottom */
+.footer-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    padding: 10px 0;
+}
+
+.footer-copyright {
+    color: white;
+    margin: 0;
+    font-size: 14px;
+    text-align: center;
+}
+
+.footer-legal {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.footer-legal a {
+    color: white;
+    text-decoration: none;
+    font-size: 12px;
+}
+
+.footer-legal a:hover {
+    text-decoration: underline;
+}
+
+/* Dark mode */
+body.dark-mode .footer {
+    background-color: rgb(23, 58, 94);
+}
+
+body.dark-mode .footer-bottom {
+    background-color: rgb(20, 51, 82);
+}
+
+body.dark-mode .footer-copyright {
+    color: white;
+}
+
+body.dark-mode .footer-legal a {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+/* Responsive */
+@media (max-width: 700px) {
+    .footer {
+        margin-left: 0 !important;
+    }
+    
+    .footer-columns {
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+    
+    .footer-col-1,
+    .footer-col-2,
+    .footer-col-3 {
+        width: 100%;
+    }
+    
+    .footer-social {
+        margin-left: 0 !important;
+        justify-content: center !important;
+    }
+    
+    .footer-bottom {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .footer-legal {
+        justify-content: center;
+    }
+}
+
+/* ========== FOOTER - DISEÑO CORREGIDO (Reemplazar la sección completa del footer) ========== */
+.footer {
+    background: var(--color-primary);
+    color: white;
+    margin-top: 3rem;
+    padding: 2rem 1rem 1rem;
+    transition: margin-left 0.5s ease;
+    margin-left: var(--sidebar-width);
+}
+
+.sidebar.minimize ~ .footer {
+    margin-left: var(--sidebar-collapsed-width);
+}
+
+.footer-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+/* ===== PARTE 1: TRES COLUMNAS ===== */
+.footer-columns {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 2rem;
+    width: 100%;
+}
+
+/* Columna 1: Logo, descripción y redes sociales */
+.footer-col-1 {
+    min-width: 280px;
+}
+
+.footer-logo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.footer-logo img {
+    height: 40px;
+}
+
+.footer-logo span {
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.footer-description {
+    font-size: 0.8rem;
+    line-height: 1.5;
+    opacity: 0.85;
+    margin-bottom: 1rem;
+    max-width: 320px;
+}
+
+/* Redes sociales - HORIZONTAL (CORREGIDO) */
+.footer-social {
+    display: flex;
+    flex-direction: row !important;  /* Forzamos horizontal */
+    gap: 1.2rem;
+    align-items: center;
+    margin-top: 0.5rem;
+}
+
+.social-icon-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    opacity: 0.8;
+}
+
+.social-icon-link:hover {
+    opacity: 1;
+    transform: translateY(-3px);
+}
+
+.social-icon-link img {
+    width: 22px;
+    height: 22px;
+}
+
+/* Columna 2: Explorar */
+.footer-col-2 {
+    flex: 1;
+    min-width: 120px;
+    text-align: left;
+}
+
+/* Columna 3: Contacto */
+.footer-col-3 {
+    flex: 1;
+    min-width: 180px;
+    text-align: left;
+}
+
+.footer-col-2 h3, .footer-col-3 h3 {
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
+    font-weight: 600;
+    letter-spacing: 1px;
+    position: relative;
+    display: inline-block;
+    padding-bottom: 0.5rem;
+    margin-top: 1rem;
+}
+
+.footer-links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.footer-links li {
+    margin-bottom: 0.5rem;
+}
+
+.footer-links a {
+    color: rgba(255, 255, 255, 0.7);
+    text-decoration: none;
+    font-size: 0.8rem;
+    transition: all 0.3s ease;
+}
+
+.footer-links a:hover {
+    color: white;
+    padding-left: 4px;
+}
+
+/* Contacto items */
+.contact-item {
+    margin-bottom: 0.5rem;
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.contact-item strong {
+    font-weight: 600;
+    margin-right: 0.3rem;
+}
+
+.contact-item a {
+    color: rgba(255, 255, 255, 0.7);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.contact-item a:hover {
+    color: white;
+}
+
+/* Línea divisoria ÚNICA (CORREGIDO - solo una) */
+.footer-divider {
+    margin: 0.5rem 0 1rem 0;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.2);
+    width: 100%;
+}
+
+/* ===== PARTE 2: Copyright y enlaces legales ===== */
+.footer-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    font-size: 0.7rem;
+    opacity: 0.7;
+    padding-top: 0.5rem;
+    width: 100%;
+    margin-top: 1rem;
+}
+
+.footer-copyright {
+    margin: 0;
+    text-align: left;
+}
+
+/* Enlaces legales - HORIZONTAL, alineados a la DERECHA */
+.footer-legal {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    margin-left: auto;
+}
+
+.footer-legal a {
+    color: rgba(255, 255, 255, 0.7);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.footer-legal a:hover {
+    color: white;
+}
+
+/* ===== RESPONSIVE MÓVIL ===== */
+@media (max-width: 700px) {
+    .footer {
+        margin-left: 0 !important;
+    }
+    
+    .footer-columns {
+        flex-direction: column;
+        gap: 1.5rem;
+        justify-content: center;
+    }
+    
+    /* Centrar todo en móvil */
+    .footer-col-1, .footer-col-2, .footer-col-3 {
+        text-align: center;
+        width: 100%;
+        margin-bottom: 1rem;
+    }
+    
+    .footer-description {
+        margin-left: auto;
+        margin-right: auto;
+    }
+    
+    .footer-social {
+        justify-content: center;
+    }
+    
+    .footer-logo {
+        justify-content: center;
+    }
+    
+    /* Línea decorativa centrada en móvil */
+    .footer-col-2 h3::after,
+    .footer-col-3 h3::after {
+        left: 50%;
+        transform: translateX(-50%);
+    }
+    
+    /* En móvil: enlaces legales ARRIBA, copyright ABAJO */
+    .footer-bottom {
+        flex-direction: column-reverse;
+        text-align: center;
+    }
+    
+    .footer-copyright {
+        text-align: center;
+    }
+    
+    /* Enlaces legales VERTICALES y centrados en móvil */
+    .footer-legal {
+        flex-direction: column;
+        gap: 0.5rem;
+        justify-content: center;
+        margin-left: 0;
+    }
+    
+    .footer-legal a {
+        text-align: center;
+    }
+    .footer-links li {
+        width: 100%;
+        text-align: center;
+    }
+    .contact-item{
+        width: 100%;
+        text-align: center;
+    }
+}
+

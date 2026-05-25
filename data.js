@@ -188,7 +188,8 @@ function inicializarDatos() {
                 fechaDesactivacion: null,
                 fechaEliminacion: null,
                 preferenciasNotificacion: {
-                    sieteDias: true,
+                    sieteDias: false,
+                    unDia: true,
                     treintaMinutos: true,
                     unaHora: false
                 },
@@ -209,7 +210,8 @@ function inicializarDatos() {
                 fechaEliminacion: null,
                 preferenciasNotificacion: {
                     sieteDias: true,
-                    treintaMinutos: true,
+                    unDia: true,
+                    treintaMinutos: false,
                     unaHora: false
                 },
                 recordatorios: []
@@ -272,7 +274,8 @@ function registrarUsuario(usuario) {
         fechaEliminacion: null,
         preferenciasNotificacion: {
             sieteDias: true,
-            treintaMinutos: true,
+            unDia: true,
+            treintaMinutos: false,
             unaHora: false
         },
         recordatorios: [] // Lista de IDs de eventos a recordar
