@@ -359,62 +359,38 @@
             isDarkMode = !isDarkMode;
             localStorage.setItem('darkMode', isDarkMode);
             applyThemeLanding();
+            // Actualizar iconos del footer después de cambiar tema
+            setTimeout(() => {
+                const isDark = document.body.classList.contains('dark-mode');
+                const socialIcons = document.querySelectorAll('.social-icon-link img');
+                socialIcons.forEach(img => {
+                    const src = img.src;
+                    if (isDark && src.includes('icons_light')) {
+                        img.src = src.replace('icons_light', 'icons_dark');
+                    } else if (!isDark && src.includes('icons_dark')) {
+                        img.src = src.replace('icons_dark', 'icons_light');
+                    }
+                });
+            }, 50);
         });
         
         applyThemeLanding();
-
-        // ==================== MANEJAR ICONOS EN MODO OSCURO ====================
-        function updateFooterIcons() {
-            const isDark = document.body.classList.contains('dark-mode');
-            
-            // Íconos de redes sociales
-            const socialIcons = ['facebook', 'instagram', 'telegram', 'whatsapp'];
-            socialIcons.forEach(icon => {
-                const lightIcon = document.querySelector(`.social-${icon}-light`);
-                const darkIcon = document.querySelector(`.social-${icon}-dark`);
-                if (lightIcon && darkIcon) {
-                    lightIcon.style.display = isDark ? 'none' : 'inline-block';
-                    darkIcon.style.display = isDark ? 'inline-block' : 'none';
-                }
-            });
-        }
-
-        // Inicializar
-        updateFooterIcons();
-
-        // Actualizar al cambiar tema
-        document.getElementById('themeToggleLanding')?.addEventListener('click', () => {
-            setTimeout(updateFooterIcons, 50);
-        });
-
-        // Inicializar y actualizar al cambiar tema
-        updateFooterIcons();
-
-        document.getElementById('themeToggleLanding')?.addEventListener('click', () => {
-            setTimeout(updateFooterIcons, 50);
-        });
-
-        // Llamar después de aplicar tema
-        const originalApplyTheme = applyThemeLanding;
-        window.applyThemeLanding = function() {
-            originalApplyTheme();
-            updateSocialIcons();
-        };
-        applyThemeLanding = window.applyThemeLanding;
-        applyThemeLanding();
-
-        // También actualizar cuando se cambie el tema
-        document.getElementById('themeToggleLanding')?.addEventListener('click', () => {
-            setTimeout(updateSocialIcons, 50);
-        });
         
         // ==================== CARGAR EVENTOS DESTACADOS ====================
         function cargarEventosDestacados() {
             const container = document.getElementById('eventos-destacados');
+            
+            // Verificar que getEventosFuturos existe
+            if (typeof getEventosFuturos === 'undefined') {
+                console.error('data.js no cargado correctamente');
+                container.innerHTML = '<p class="error">Error al cargar los eventos. Recarga la página.</p>';
+                return;
+            }
+            
             const eventos = getEventosFuturos();
             
-            if (eventos.length === 0) {
-                container.innerHTML = '<p>No hay eventos próximos</p>';
+            if (!eventos || eventos.length === 0) {
+                container.innerHTML = '<p class="loading-spinner">No hay eventos próximos</p>';
                 return;
             }
             
@@ -422,7 +398,7 @@
                 <div class="evento-destacado-card" onclick="window.location.href='detallesEvento.html?id=${evento.id}'">
                     <img src="${evento.poster}" alt="${evento.nombre}" onerror="this.src='https://picsum.photos/id/100/400/300'">
                     <div class="evento-info-landing">
-                        <h3>${evento.nombre}</h3>
+                        <h3>${evento.nombre.length > 35 ? evento.nombre.substring(0, 32) + '...' : evento.nombre}</h3>
                         <p class="fecha">${new Date(evento.fechaInicio).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}</p>
                         <span class="categoria-badge">${evento.categoria}</span>
                     </div>
@@ -430,13 +406,11 @@
             `).join('');
         }
         
-        cargarEventosDestacados();
-
-        // Mostrar enlace de promocionar en footer solo para administradores
-        const usuarioFooter = getUsuarioActual();
-        if (usuarioFooter && esAdministrador(usuarioFooter)) {
-            const footerPromo = document.getElementById('footerPromocionLink');
-            if (footerPromo) footerPromo.style.display = 'list-item';
+        // Esperar a que data.js cargue completamente
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', cargarEventosDestacados);
+        } else {
+            cargarEventosDestacados();
         }
     </script>
 </body>
