@@ -20,12 +20,15 @@
             right: 1rem;
             background: var(--color-surface);
             border-radius: 20px;
-            padding: 1rem 1.2rem;
+            padding: 1rem 1.5rem;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
             z-index: 1000;
             backdrop-filter: blur(10px);
             background: rgba(var(--color-surface-rgb, 255, 255, 255), 0.95);
             transition: all 0.3s ease;
+            min-width: 320px;
+            width: auto;
+            max-width: calc(100% - 2rem);
         }
         
         body.dark-mode .map-filters-bar {
@@ -85,10 +88,10 @@
             margin: 0.75rem 0;
         }
         
+        /* FILA DE CARACTERÍSTICAS - Checkboxes al lado del título */
         .filter-features-row {
             display: flex;
             align-items: center;
-            justify-content: space-between;
             flex-wrap: wrap;
             gap: 1rem;
         }
@@ -99,12 +102,14 @@
             text-transform: uppercase;
             letter-spacing: 1px;
             color: rgb(2, 90, 138);
+            flex-shrink: 0;
         }
         
         .filter-checkboxes {
             display: flex;
             flex-wrap: wrap;
-            gap: 1rem;
+            gap: 0.8rem;
+            flex: 1;
         }
         
         .filter-checkbox-item {
@@ -144,7 +149,6 @@
             min-height: 500px;
         }
         
-        /* El main-content ya tiene estilos en styles.css, solo ajustamos posición relativa */
         .main-content {
             position: relative;
             padding: 0 !important;
@@ -152,13 +156,65 @@
             overflow: hidden;
         }
         
+        /* ========== CORRECCIÓN BOTONES ZOOM MAPA EN MODO OSCURO ========== */
+        body.dark-mode .leaflet-control-zoom-in,
+        body.dark-mode .leaflet-control-zoom-out {
+            background-color: var(--color-surface) !important;
+            color: var(--color-text-primary) !important;
+            border: 1px solid var(--color-border) !important;
+        }
+        
+        body.dark-mode .leaflet-control-zoom-in:hover,
+        body.dark-mode .leaflet-control-zoom-out:hover {
+            background-color: var(--color-bg) !important;
+        }
+        
+        body.dark-mode .leaflet-control-zoom-in span,
+        body.dark-mode .leaflet-control-zoom-out span {
+            color: var(--color-text-primary) !important;
+        }
+        
+        body.dark-mode .leaflet-layer,
+        body.dark-mode .leaflet-control-attribution {
+            filter: hue-rotate(180deg) brightness(200%) contrast(100%);
+        }
+        
+        body.dark-mode .leaflet-control-attribution {
+            background-color: rgb(98, 106, 108);
+            color: white;
+        }
+        
+        body.dark-mode .leaflet-control-attribution a {
+            color: #ffffff;
+        }
+        
+        body.dark-mode .leaflet-popup-content-wrapper {
+            background-color: var(--color-surface);
+            color: var(--color-text-primary);
+        }
+        
+        body.dark-mode .leaflet-popup-tip {
+            background-color: var(--color-surface);
+        }
+        
+        .leaflet-container {
+            background-color: #e0e0e0;
+        }
+        
+        body.dark-mode .leaflet-container {
+            background-color: #1a1a1a;
+        }
+        
+        /* ========== RESPONSIVE ========== */
         @media (max-width: 700px) {
             #mapa-principal {
                 height: calc(100vh - 120px) !important;
             }
             .map-filters-bar {
-                padding: 0.8rem;
-                border-radius: 16px;
+                padding: 0.8rem 1rem;
+                min-width: auto;
+                left: 0.5rem;
+                right: 0.5rem;
             }
             .map-category-chip {
                 padding: 0.3rem 0.7rem;
@@ -177,43 +233,13 @@
                 justify-content: center;
             }
         }
-
-        /* ========== MAPA - TEMA OSCURO ========== */
-        body.dark-mode .leaflet-layer,
-        body.dark-mode .leaflet-control-zoom-in,
-        body.dark-mode .leaflet-control-zoom-out,
-        body.dark-mode .leaflet-control-attribution {
-            filter: hue-rotate(180deg) brightness(200%) contrast(100%);
-        }
-
-        body.dark-mode .leaflet-marker-icon {
-            filter: invert(0%) !important;
-        }
-
-        body.dark-mode .leaflet-control-attribution {
-            background-color: rgb(98, 106, 108);
-            color: white;
-        }
-
-        body.dark-mode .leaflet-control-attribution a {
-            color: #ffffff;
-        }
-
-        body.dark-mode .leaflet-popup-content-wrapper {
-            background-color: var(--color-surface);
-            color: var(--color-text-primary);
-        }
-
-        body.dark-mode .leaflet-popup-tip {
-            background-color: var(--color-surface);
-        }
-
-        .leaflet-container {
-            background-color: #e0e0e0;
-        }
-
-        body.dark-mode .leaflet-container {
-            background-color: #1a1a1a;
+        
+        /* Escritorio: panel más ancho */
+        @media (min-width: 701px) {
+            .map-filters-bar {
+                min-width: 450px;
+                max-width: 600px;
+            }
         }
     </style>
 </head>
@@ -321,7 +347,7 @@
         </div>
     </div>
 
-    <!-- Contenido principal - Mapa -->
+    <!-- Contenido principal - Mapa (sin footer) -->
     <div class="main-content">
         <div class="mapa-container-full">
             <div id="mapa-principal"></div>
@@ -335,13 +361,12 @@
                 <div class="filter-divider"></div>
                 
                 <div class="filter-features-row">
-                    <div class="filter-features-label">CARACTERÍSTICAS</div>
                     <div class="filter-checkboxes">
                         <label class="filter-checkbox-item">
-                            <input type="checkbox" id="map-filtro-apto-menores"> Apto para menores
+                            <input type="checkbox" id="map-filtro-apto-menores"> 👶 Apto para menores
                         </label>
                         <label class="filter-checkbox-item">
-                            <input type="checkbox" id="map-filtro-aire-libre"> Al aire libre
+                            <input type="checkbox" id="map-filtro-aire-libre"> 🌳 Al aire libre
                         </label>
                     </div>
                 </div>
@@ -349,63 +374,7 @@
         </div>
     </div>
 
-    <footer class="footer">
-        <div class="footer-container">
-            <div class="footer-columns">
-                <div class="footer-col-1">
-                    <div class="footer-logo">
-                        <img src="resources/aguacero_cuba_darklogo_trasnparente.png" alt="Cultura Habana">
-                        <span>Cultura Habana</span>
-                    </div>
-                    <p class="footer-description">
-                        Los mejores planes en La Habana se encuentran bajo este Aguacero.
-                        <br><br>
-                        Deja la sombrilla en casa, ¡no te pierdas ni una gota de cultura!
-                    </p>
-                    <div class="footer-social">
-                        <a href="https://www.facebook.com/aguacerocuba" class="social-icon-link" target="_blank">
-                            <img src="resources/icons_light/facebook.png" alt="Facebook">
-                        </a>
-                        <a href="https://www.instagram.com/aguacero_cuba/" class="social-icon-link" target="_blank">
-                            <img src="resources/icons_light/instagram.png" alt="Instagram">
-                        </a>
-                        <a href="https://t.me/Aguacero" class="social-icon-link" target="_blank">
-                            <img src="resources/icons_light/telegram.png" alt="Telegram">
-                        </a>
-                        <a href="https://www.whatsapp.com/channel/0029VbApHoQKmCPX3VynJs2n" class="social-icon-link" target="_blank">
-                            <img src="resources/icons_light/whatsapp.png" alt="WhatsApp">
-                        </a>
-                    </div>
-                </div>
-                
-                <div class="footer-col-2">
-                    <h3>EXPLORAR</h3>
-                    <ul class="footer-links">
-                        <li><a href="inicio.html">Inicio</a></li>
-                        <li><a href="calendario.html">Calendario</a></li>
-                        <li><a href="mapa.html">Mapa</a></li>
-                        <li id="footerPromocionLink" style="display: none;"><a href="promocion.html">Promocionar</a></li>
-                    </ul>
-                </div>
-                
-                <div class="footer-col-3">
-                    <h3>CONTACTO</h3>
-                    <div class="contact-item"><strong>Tel:</strong> <a href="tel:+5351234567">+53 5123 4567</a></div>
-                    <div class="contact-item"><strong>Co:</strong> <a href="mailto:contacto@culturahabana.com">contacto@culturahabana.com</a></div>
-                    <div class="contact-item"><strong>Ub:</strong> <span>La Habana, Cuba</span></div>
-                </div>
-            </div>
-            
-            <div class="footer-bottom">
-                <p class="footer-copyright">&copy; 2025 Cultura Habana. Todos los derechos reservados.</p>
-                <div class="footer-legal">
-                    <a href="#">Política de privacidad</a>
-                    <a href="#">Términos de servicio</a>
-                    <a href="#">Política de cookies</a>
-                </div>
-            </div>
-        </div>
-    </footer>
+    <!-- NO HAY FOOTER en mapa.html para no interferir con el scroll del mapa -->
 
     <script src="data.js"></script>
     <script src="notifications.js"></script>
@@ -514,7 +483,7 @@
         if (filtroMapaMenores) filtroMapaMenores.addEventListener('change', cargarMarcadores);
         if (filtroMapaAireLibre) filtroMapaAireLibre.addEventListener('change', cargarMarcadores);
         
-        // Observar cambios de tema oscuro para actualizar tiles
+        // Observar cambios de tema oscuro para actualizar tiles y botones del mapa
         const themeObserver = new MutationObserver(() => {
             if (map && mapInitialized) {
                 const currentTileUrl = getTileUrl();
@@ -526,12 +495,14 @@
                 L.tileLayer(currentTileUrl, {
                     attribution: '&copy; <a href="https://carto.com/">CartoDB</a> | &copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>'
                 }).addTo(map);
+                
+                // Forzar actualización visual de los botones de zoom
+                setTimeout(() => { map.invalidateSize(); }, 100);
             }
         });
         themeObserver.observe(document.body, { attributes: true, attributeFilter: ['class'] });
         
         // Inicializar mapa después de que script.js termine de cargar
-        // Usamos un delay más largo para asegurar que el DOM está listo
         setTimeout(function() {
             initMap();
             renderizarFiltrosMapa();
@@ -542,13 +513,6 @@
                 setTimeout(function() { map.invalidateSize(); }, 200);
             }
         });
-
-        // Mostrar enlace de promocionar en footer solo para administradores
-        const usuarioFooter = getUsuarioActual();
-        if (usuarioFooter && esAdministrador(usuarioFooter)) {
-            const footerPromo = document.getElementById('footerPromocionLink');
-            if (footerPromo) footerPromo.style.display = 'list-item';
-        }
     </script>
 </body>
 </html>
