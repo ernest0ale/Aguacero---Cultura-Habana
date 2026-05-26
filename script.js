@@ -43,7 +43,7 @@ function getPreferenciasUsuario() {
     return usuario?.preferencias || [];
 }
 
-// ==================== MENÚ LATERAL UNIFICADO ====================
+// ==================== MENÚ LATERAL UNIFICADO (VERSIÓN FUNCIONAL) ====================
 function initSidebar() {
     const sidebar = document.getElementById('sidebar');
     const menuToggleBtn = document.getElementById('menuToggleBtn');
@@ -463,6 +463,10 @@ function applyTheme() {
     const notifDark = document.getElementById('notifIconDark');
     const menuIcon = document.getElementById('menuIcon');
     
+    // Iconos de búsqueda móvil
+    const mobileSearchLight = document.getElementById('mobileSearchIconLight');
+    const mobileSearchDark = document.getElementById('mobileSearchIconDark');
+    
     if (isDarkMode) {
         document.body.classList.add('dark-mode');
         if (searchLight) searchLight.style.display = 'none';
@@ -472,6 +476,10 @@ function applyTheme() {
         if (notifLight) notifLight.style.display = 'none';
         if (notifDark) notifDark.style.display = 'inline-block';
         if (menuIcon) menuIcon.src = 'resources/icons_dark/menu.png';
+        
+        // Iconos búsqueda móvil
+        if (mobileSearchLight) mobileSearchLight.style.display = 'none';
+        if (mobileSearchDark) mobileSearchDark.style.display = 'inline-block';
     } else {
         document.body.classList.remove('dark-mode');
         if (searchLight) searchLight.style.display = 'inline-block';
@@ -481,6 +489,16 @@ function applyTheme() {
         if (notifLight) notifLight.style.display = 'inline-block';
         if (notifDark) notifDark.style.display = 'none';
         if (menuIcon) menuIcon.src = 'resources/icons_light/menu.png';
+        
+        // Iconos búsqueda móvil
+        if (mobileSearchLight) mobileSearchLight.style.display = 'inline-block';
+        if (mobileSearchDark) mobileSearchDark.style.display = 'none';
+    }
+    
+    // Actualizar icono de cerrar del buscador móvil si está abierto
+    const closeIcon = document.getElementById('mobileSearchCloseIcon');
+    if (closeIcon && mobileSearchOverlay && mobileSearchOverlay.classList.contains('active')) {
+        closeIcon.src = isDarkMode ? 'resources/icons_dark/icon_x.png' : 'resources/icons_light/icon_x.png';
     }
 }
 
@@ -692,11 +710,9 @@ function initSearch() {
 
 // ==================== NOTIFICACIONES ====================
 function initNotifications() {
-    // Llamar al sistema de notificaciones mejorado desde notifications.js
     if (typeof initNotificationsSystem === 'function') {
         initNotificationsSystem();
     } else {
-        // Fallback por si notifications.js no carga
         const notifBtn = document.getElementById('notificationsBtn');
         if (notifBtn) {
             notifBtn.addEventListener('click', () => {
@@ -723,16 +739,226 @@ function setupCategoriaLinks() {
     }
 }
 
-// ==================== INICIALIZACIÓN GENERAL ====================
+// ==================== BÚSQUEDA MOBILE (ESTILO YOUTUBE CON ICONOS DINÁMICOS) ====================
+let mobileSearchOverlay = null;
+
+function initMobileSearch() {
+    if (document.querySelector('.mobile-search-overlay')) return;
+    
+    const overlay = document.createElement('div');
+    overlay.className = 'mobile-search-overlay';
+    overlay.innerHTML = `
+        <div class="mobile-search-container">
+            <div class="mobile-search-bar">
+                <input type="text" id="mobile-search-input" placeholder="Buscar eventos...">
+                <button class="mobile-search-btn" id="mobile-search-submit">
+                    <img id="mobileSearchBtnIcon" src="resources/icons_dark/search.png" alt="buscar">
+                </button>
+                <button class="mobile-search-close" id="mobile-search-close">
+                    <img id="mobileSearchCloseIcon" src="resources/icons_light/icon_x.png" alt="cerrar">
+                </button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(overlay);
+    mobileSearchOverlay = overlay;
+    
+    const searchInput = document.getElementById('mobile-search-input');
+    const searchSubmit = document.getElementById('mobile-search-submit');
+    const searchClose = document.getElementById('mobile-search-close');
+    const mobileSearchBtnIcon = document.getElementById('mobileSearchBtnIcon');
+    const mobileSearchCloseIcon = document.getElementById('mobileSearchCloseIcon');
+    
+    function realizarBusquedaMobile() {
+        const termino = searchInput.value.trim();
+        if (termino) {
+            window.location.href = `busqueda.html?q=${encodeURIComponent(termino)}`;
+        } else {
+            cerrarBusquedaMobile();
+        }
+    }
+    
+    searchSubmit?.addEventListener('click', realizarBusquedaMobile);
+    searchInput?.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') realizarBusquedaMobile();
+    });
+    searchClose?.addEventListener('click', cerrarBusquedaMobile);
+    
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) cerrarBusquedaMobile();
+    });
+    
+    function updateMobileSearchIcons() {
+        const isDark = document.body.classList.contains('dark-mode');
+        if (mobileSearchBtnIcon) {
+            mobileSearchBtnIcon.src = 'resources/icons_dark/search.png';
+        }
+        if (mobileSearchCloseIcon) {
+            mobileSearchCloseIcon.src = isDark ? 'resources/icons_dark/icon_x.png' : 'resources/icons_light/icon_x.png';
+        }
+    }
+    
+    const topBarRight = document.querySelector('.top-bar-right');
+    if (topBarRight && !document.querySelector('.mobile-search-trigger')) {
+        const searchTrigger = document.createElement('button');
+        searchTrigger.className = 'mobile-search-trigger';
+        searchTrigger.id = 'mobileSearchTrigger';
+        searchTrigger.innerHTML = `
+            <img id="mobileSearchIconLight" src="resources/icons_light/search.png" alt="buscar">
+            <img id="mobileSearchIconDark" src="resources/icons_dark/search.png" alt="buscar" style="display:none;">
+        `;
+        
+        const themeBtn = document.querySelector('#themeToggleBtn');
+        if (themeBtn) {
+            themeBtn.insertAdjacentElement('beforebegin', searchTrigger);
+        } else {
+            topBarRight.insertAdjacentElement('afterbegin', searchTrigger);
+        }
+        
+        searchTrigger.addEventListener('click', () => {
+            if (mobileSearchOverlay) {
+                mobileSearchOverlay.classList.add('active');
+                updateMobileSearchIcons();
+                setTimeout(() => document.getElementById('mobile-search-input')?.focus(), 100);
+            }
+        });
+    }
+    
+    const originalApplyTheme = window.applyTheme || function() {};
+    window.applyTheme = function() {
+        if (typeof originalApplyTheme === 'function') originalApplyTheme();
+        
+        const isDark = document.body.classList.contains('dark-mode');
+        const lightIcon = document.querySelector('#mobileSearchIconLight');
+        const darkIcon = document.querySelector('#mobileSearchIconDark');
+        
+        if (lightIcon && darkIcon) {
+            lightIcon.style.display = isDark ? 'none' : 'inline-block';
+            darkIcon.style.display = isDark ? 'inline-block' : 'none';
+        }
+        
+        if (mobileSearchOverlay && mobileSearchOverlay.classList.contains('active')) {
+            const closeIcon = document.getElementById('mobileSearchCloseIcon');
+            if (closeIcon) {
+                closeIcon.src = isDark ? 'resources/icons_dark/icon_x.png' : 'resources/icons_light/icon_x.png';
+            }
+        }
+    };
+    
+    const isDark = document.body.classList.contains('dark-mode');
+    const lightIcon = document.querySelector('#mobileSearchIconLight');
+    const darkIcon = document.querySelector('#mobileSearchIconDark');
+    if (lightIcon && darkIcon) {
+        lightIcon.style.display = isDark ? 'none' : 'inline-block';
+        darkIcon.style.display = isDark ? 'inline-block' : 'none';
+    }
+}
+
+function cerrarBusquedaMobile() {
+    if (mobileSearchOverlay) {
+        mobileSearchOverlay.classList.remove('active');
+        const searchInput = document.getElementById('mobile-search-input');
+        if (searchInput) searchInput.value = '';
+    }
+}
+
+// ==================== CONTROL DE NOTIFICACIONES POR SESIÓN ====================
+function actualizarNotificacionesPorSesion() {
+    const usuario = getUsuarioActual();
+    const notifWrapper = document.querySelector('.notifications-wrapper');
+    
+    if (notifWrapper) {
+        if (usuario) {
+            notifWrapper.classList.add('visible');
+            notifWrapper.style.display = 'block';
+        } else {
+            notifWrapper.classList.remove('visible');
+            notifWrapper.style.display = 'none';
+        }
+    }
+}
+
+// ==================== AVATAR UNIFICADO ====================
+function initAvatarUnificado() {
+    const avatarDiv = document.getElementById('avatarUsuario');
+    const menuPromocion = document.getElementById('menuPromocion');
+    
+    if (!avatarDiv) return;
+    
+    function updateAvatar() {
+        const usuario = getUsuarioActual();
+        
+        if (usuario && usuario.nombre) {
+            avatarDiv.innerHTML = usuario.nombre.charAt(0).toUpperCase();
+            avatarDiv.style.backgroundColor = usuario.avatarColor || '#2ecc71';
+            avatarDiv.style.color = 'white';
+            avatarDiv.style.border = 'none';
+            avatarDiv.style.fontSize = '1rem';
+            avatarDiv.style.fontWeight = '600';
+            avatarDiv.style.width = '36px';
+            avatarDiv.style.height = '36px';
+            avatarDiv.style.borderRadius = '50%';
+            avatarDiv.style.display = 'flex';
+            avatarDiv.style.alignItems = 'center';
+            avatarDiv.style.justifyContent = 'center';
+            avatarDiv.style.cursor = 'pointer';
+            avatarDiv.title = usuario.nombre;
+            
+            if (menuPromocion) {
+                menuPromocion.style.display = esAdministrador(usuario) ? 'block' : 'none';
+            }
+        } else {
+            avatarDiv.innerHTML = 'Iniciar sesión';
+            avatarDiv.style.backgroundColor = 'transparent';
+            avatarDiv.style.color = 'var(--color-primary)';
+            avatarDiv.style.border = '2px solid var(--color-primary)';
+            avatarDiv.style.borderRadius = '30px';
+            avatarDiv.style.fontSize = '0.75rem';
+            avatarDiv.style.fontWeight = '600';
+            avatarDiv.style.width = 'auto';
+            avatarDiv.style.height = 'auto';
+            avatarDiv.style.padding = '0.4rem 1rem';
+            avatarDiv.style.display = 'inline-flex';
+            avatarDiv.title = 'Iniciar sesión';
+            if (menuPromocion) menuPromocion.style.display = 'none';
+        }
+    }
+    
+    avatarDiv.addEventListener('click', () => {
+        const usuario = getUsuarioActual();
+        if (usuario) {
+            if (confirm(`Cerrar sesión ${usuario.nombre}?`)) {
+                cerrarSesion();
+                window.location.reload();
+            }
+        } else {
+            window.location.href = 'login.html';
+        }
+    });
+    
+    updateAvatar();
+}
+
+// ==================== INICIALIZACIÓN COMPLETA ====================
 document.addEventListener('DOMContentLoaded', () => {
+    // Aplicar tema y color PRIMERO
     applyTheme();
     aplicarColorPrimarioUsuario();
-    initSidebar();
-    initAvatar();
+    
+    // Inicializar sidebar (DEBE SER ANTES que otras modificaciones del DOM)
+    if (typeof initSidebar === 'function') {
+        initSidebar();
+    }
+    
+    // Inicializar resto de componentes
+    initMobileSearch();
+    initAvatarUnificado();
     initSearch();
     initNotifications();
     setupCategoriaLinks();
+    actualizarNotificacionesPorSesion();
     
+    // Theme toggle
     const themeToggleBtn = document.getElementById('themeToggleBtn');
     if (themeToggleBtn) {
         themeToggleBtn.addEventListener('click', () => {
@@ -743,3 +969,13 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
+function getEtiquetaAptoMenores(apto) {
+    if (apto === true) return { texto: '👶 Apto para menores', clase: 'badge-menores-si' };
+    return { texto: '❌ No apto para menores', clase: 'badge-menores-no' };
+}
+
+function getEtiquetaAireLibre(aire) {
+    if (aire === true) return { texto: '🌳 Al aire libre', clase: 'badge-aire-si' };
+    return { texto: '🏠 En espacio cerrado', clase: 'badge-aire-no' };
+}
